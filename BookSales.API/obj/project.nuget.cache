@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "WmyjKzAGfmI=",
+  "dgSpecHash": "INhEDc3eTxY=",
   "success": true,
   "projectFilePath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BookSales.API.csproj",
   "expectedPackageFiles": [
@@ -23,6 +23,7 @@
     "C:\\Users\\msich\\.nuget\\packages\\microsoft.openapi\\1.2.3\\microsoft.openapi.1.2.3.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\microsoft.win32.registry\\5.0.0\\microsoft.win32.registry.5.0.0.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\mongodb.bson\\2.29.0\\mongodb.bson.2.29.0.nupkg.sha512",
+    "C:\\Users\\msich\\.nuget\\packages\\mongodb.driver\\2.29.0\\mongodb.driver.2.29.0.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\mongodb.driver.core\\2.29.0\\mongodb.driver.core.2.29.0.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\mongodb.libmongocrypt\\1.12.0\\mongodb.libmongocrypt.1.12.0.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\sharpcompress\\0.30.1\\sharpcompress.0.30.1.nupkg.sha512",

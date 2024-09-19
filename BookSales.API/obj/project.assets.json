@@ -317,6 +317,25 @@
           }
         }
       },
+      "MongoDB.Driver/2.29.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.Logging.Abstractions": "2.0.0",
+          "MongoDB.Bson": "2.29.0",
+          "MongoDB.Driver.Core": "2.29.0",
+          "MongoDB.Libmongocrypt": "1.12.0"
+        },
+        "compile": {
+          "lib/netstandard2.1/MongoDB.Driver.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/MongoDB.Driver.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "MongoDB.Driver.Core/2.29.0": {
         "type": "package",
         "dependencies": {
@@ -1309,6 +1328,25 @@
         "packageIcon.png"
       ]
     },
+    "MongoDB.Driver/2.29.0": {
+      "sha512": "1IfTnHX8G2SsXIHDz80OVSmcdL95vzzWXGGucR45k7+TUOcWVhiqYcc13ckRXl4NVxn4UTRrrKl+92xvjwWrRA==",
+      "type": "package",
+      "path": "mongodb.driver/2.29.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net472/MongoDB.Driver.dll",
+        "lib/net472/MongoDB.Driver.xml",
+        "lib/netstandard2.0/MongoDB.Driver.dll",
+        "lib/netstandard2.0/MongoDB.Driver.xml",
+        "lib/netstandard2.1/MongoDB.Driver.dll",
+        "lib/netstandard2.1/MongoDB.Driver.xml",
+        "mongodb.driver.2.29.0.nupkg.sha512",
+        "mongodb.driver.nuspec",
+        "packageIcon.png"
+      ]
+    },
     "MongoDB.Driver.Core/2.29.0": {
       "sha512": "3M7gdmuLEay4Wc/q4zm/oA5KT4E62SsRBiq3prpT3tGEPkfstr3N3fYRbzYNu8TJgeyS0q5OPe4zI4yi6/GemQ==",
       "type": "package",
@@ -1690,6 +1728,7 @@
   "projectFileDependencyGroups": {
     "net8.0": [
       "Microsoft.EntityFrameworkCore >= 8.0.8",
+      "MongoDB.Driver >= 2.29.0",
       "MongoDB.Driver.Core >= 2.29.0",
       "Swashbuckle.AspNetCore >= 6.4.0"
     ]
@@ -1747,6 +1786,10 @@
           "Microsoft.EntityFrameworkCore": {
             "target": "Package",
             "version": "[8.0.8, )"
+          },
+          "MongoDB.Driver": {
+            "target": "Package",
+            "version": "[2.29.0, )"
           },
           "MongoDB.Driver.Core": {
             "target": "Package",
