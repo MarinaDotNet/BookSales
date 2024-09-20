@@ -33,7 +33,6 @@ public class Book
     ///<summary>Gets or sets the list of authors for the book.</summary>
     ///<remarks>This property is stored as an array in the MongoDB document under the "authors" element.</remarks>
     [BsonElement("authors")]
-    [BsonRepresentation(BsonType.Array)]
     public List<string> Authors { get; set; } = [];
 
     ///<summary>Gets or sets the price of the book.</summary>
@@ -64,7 +63,6 @@ public class Book
     ///<summary>Gets or sets the list of the genres for the book.</summary>
     ///<remarks>This property is stored as an array in the MongoDB document as the "genres" element.</remarks>
     [BsonElement("genres")]
-    [BsonRepresentation(BsonType.Array)]
     public List<string> Genres { get; set; } = [];
 
     ///<summary>Gets or sets the link to additonal information about the book.</summary>
@@ -73,7 +71,6 @@ public class Book
     ///contains an URI pointing to more details about the book.
     ///</remarks>
     [BsonElement("link")]
-    [BsonRepresentation(BsonType.String)]
     public Uri Link { get; set; } = new Uri("about:black", UriKind.Absolute);
 
     ///<summary>Gets or sets the value indecating whether the book is available.</summary>
