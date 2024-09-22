@@ -239,7 +239,7 @@ public class MongoDBServices
         }
         try
         {
-            var trimedCondition = condition.Trim();
+            var trimedCondition = condition.Trim().ToUpperInvariant();
 
             //Defines the filter using Builders for better readability and performance
             var filter = Builders<Book>.Filter.Or(
@@ -400,21 +400,36 @@ public class MongoDBServices
     }
 
     /// <summary>
-    /// Asynchronously retrieves the total count of books that partially match a specified search term 
-    /// across various book attributes such as title, author, language, genre, publisher, and availability status.
+    /// Asynchronously counts the total number of books that partially match a specified search term across various book attributes
+    /// (such as title, author, language, genre, publisher, or annotation) and optionally filters by availability status.
     /// </summary>
-    /// <param name="searchTerm">The term to partially match in book attributes such as title, author, language, genre, or publisher.</param>
-    /// <param name="isAvailable">The availability status of the books to filter by.</param>
+    /// <remarks>
+    /// This method searches for books in the MongoDB collection that contain the search term as a substring in one or more fields,
+    /// including "Title", "Language", "Publisher", "Annotation", "Authors", and "Genres". It also supports an optional filter by availability status.
+    /// Case-insensitive comparisons are handled using MongoDB's collation feature.
+    /// </remarks>
+    /// <param name="searchTerm">
+    /// The string to search within book attributes such as "Title", "Language", "Publisher", "Annotation", "Authors", or "Genres".
+    /// This parameter is required and cannot be null or empty.
+    /// </param>
+    /// <param name="isAvailable">
+    /// An optional boolean value indicating whether to filter by availability status. If provided, the method will only count books
+    /// that match the availability status (true for available, false for unavailable). If null, the availability filter is ignored.
+    /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation. The task result contains the total number of books 
-    /// that partially match the specified condition and availability.
+    /// A task representing the asynchronous operation. The task result contains the total number of books that partially match the specified search term
+    /// and, optionally, the availability status.
     /// </returns>
     /// <exception cref="ArgumentException">
     /// Thrown when the search term is null or whitespace.
     /// </exception>
-    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs.</exception>
-    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the operation.</exception>
-    public async Task<long> CountBooksByPartialMatchAsync(string searchTerm, bool isAvailable)
+    /// <exception cref="MongoException">
+    /// Thrown when an error occurs while communicating with the MongoDB server or querying the collection.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// Thrown when an unexpected error occurs during the execution of the query.
+    /// </exception>
+    public async Task<long> CountBooksByPartialMatchAsync(string searchTerm, bool? isAvailable)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -422,26 +437,34 @@ public class MongoDBServices
         }
         try
         {
-            var trimedSerchTerm = searchTerm.Trim().ToUpperInvariant();
+            var trimmedSearchTerm = searchTerm.Trim();
 
-            var filter = Builders<Book>.Filter.And(
-                Builders<Book>.Filter.Eq(book => book.IsAvailable, isAvailable),
-                Builders<Book>.Filter.Or(
+            var attributeFilter = Builders<Book>.Filter.Or(
                     Builders<Book>.Filter.Where(book => book.Title != null &&
-                    book.Title.Trim().ToUpperInvariant().Contains(trimedSerchTerm)),
+                    book.Title.Contains(trimmedSearchTerm)),
                     Builders<Book>.Filter.Where(book => book.Language != null &&
-                    book.Language.Trim().ToUpperInvariant().Contains(trimedSerchTerm)),
+                    book.Language.Contains(trimmedSearchTerm)),
                     Builders<Book>.Filter.Where(book => book.Publisher != null &&
-                    book.Publisher.Trim().ToUpperInvariant().Contains(trimedSerchTerm)),
+                    book.Publisher.Contains(trimmedSearchTerm)),
                     Builders<Book>.Filter.Where(book => book.Annotation != null &&
-                    book.Annotation.Trim().ToUpperInvariant().Contains(trimedSerchTerm)),
+                    book.Annotation.Contains(trimmedSearchTerm)),
                     Builders<Book>.Filter.Where(book =>
-                    book.Authors!.Any(author => author.Trim().ToUpperInvariant().Contains(trimedSerchTerm))),
+                    book.Authors!.Any(author => author.Contains(trimmedSearchTerm))),
                     Builders<Book>.Filter.Where(book =>
-                    book.Genres!.Any(genre => genre.Trim().ToUpperInvariant().Contains(trimedSerchTerm)))
-                    ));
+                    book.Genres!.Any(genre => genre.Contains(trimmedSearchTerm)))
+                    );
 
-            return await _collection.CountDocumentsAsync(filter);
+            // Availability filter (optional)
+            var availabilityFilter = isAvailable.HasValue ?
+                Builders<Book>.Filter.Eq(book => book.IsAvailable, isAvailable.Value) :
+                Builders<Book>.Filter.Empty;
+
+            // Combine both filters
+            var combinedFilter = Builders<Book>.Filter.And(attributeFilter, availabilityFilter);
+
+            return await _collection.Find(combinedFilter,
+                new FindOptions { Collation = new Collation("en", strength: CollationStrength.Primary) })
+                .CountDocumentsAsync();
         }
         catch (MongoException ex)
         {
