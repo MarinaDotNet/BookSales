@@ -1,6 +1,10 @@
 ﻿using BookSales.API.Models;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
+using Microsoft.VisualBasic.FileIO;
+using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace BookSales.API.Services;
 
@@ -235,7 +239,7 @@ public class MongoDBServices
         }
         try
         {
-            var trimedCondition = condition.Trim().ToUpperInvariant();
+            var trimedCondition = condition.Trim();
 
             //Defines the filter using Builders for better readability and performance
             var filter = Builders<Book>.Filter.Or(
@@ -323,19 +327,36 @@ public class MongoDBServices
     }
 
     /// <summary>
-    /// Asynchronously retrieves the total count of books that exactly match a specified search term across various book attributes and availability status.
+    /// Asynchronously counts the total number of books that exactly match the specified search term across various book attributes
+    /// (such as title, author, language, genre, or publisher) and optionally filters by availability status.
     /// </summary>
-    /// <param name="searchTerm">The term to match exactly in book attributes such as title, author, language, genre, or publisher.</param>
-    /// <param name="isAvailable">The availability status of the books to filter by.</param>
+    /// <remarks>
+    /// This method counts books that match the given search term exactly in one or more fields, including "Title", "Language",
+    /// "Publisher", "Authors", and "Genres". It also supports an optional filter by availability status. Case-insensitive comparisons
+    /// are handled using MongoDB's collation feature.
+    /// </remarks>
+    /// <param name="searchTerm">
+    /// The string to match exactly in book attributes such as "Title", "Language", "Publisher", "Authors", or "Genres".
+    /// This parameter is required and cannot be null or empty.
+    /// </param>
+    /// <param name="isAvailable">
+    /// An optional boolean value indicating whether to filter by availability status. If provided, the method will only count books
+    /// that match the availability status (true for available, false for unavailable). If null, the availability filter is ignored.
+    /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation. The task result contains the total number of books that match the specified condition and availability.
+    /// A task representing the asynchronous operation. The task result contains the total number of books that match the specified search term
+    /// and, optionally, the availability status.
     /// </returns>
-    /// <exception cref="ArgumentException">
+    /// <exception cref="ArgumentNullException">
     /// Thrown when the search term is null or whitespace.
     /// </exception>
-    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs.</exception>
-    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the operation.</exception>
-    public async Task<long> CountBooksByExactMatchAsync(string searchTerm, bool isAvailable)
+    /// <exception cref="MongoException">
+    /// Thrown when an error occurs while communicating with the MongoDB server or querying the collection.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// Thrown when an unexpected error occurs during the execution of the query.
+    /// </exception>
+    public async Task<long> CountBooksByExactMatchAsync(string searchTerm, bool? isAvailable = null)
     {
         if (string.IsNullOrWhiteSpace(searchTerm))
         {
@@ -343,15 +364,28 @@ public class MongoDBServices
         }
         try
         {
-            var trimedSerchTearm = searchTerm.Trim();
-            return await _collection.Find(book =>
-            book.IsAvailable == isAvailable &&
-            (book.Title!.Trim().Equals(trimedSerchTearm, StringComparison.OrdinalIgnoreCase) ||
-            book.Language!.Trim().Equals(trimedSerchTearm, StringComparison.OrdinalIgnoreCase) ||
-            book.Publisher!.Trim().Equals(trimedSerchTearm, StringComparison.OrdinalIgnoreCase) ||
-            book.Authors.Any(author => author.Trim().Equals(trimedSerchTearm, StringComparison.OrdinalIgnoreCase)) ||
-            book.Genres!.Any(genre => genre.Trim().Equals(trimedSerchTearm, StringComparison.OrdinalIgnoreCase)))
-            ).CountDocumentsAsync();
+            var trimmedSearchTerm = searchTerm.Trim();
+
+            // Base filter for matching book attributes
+            var attributeFilter = Builders<Book>.Filter.Or(
+                Builders<Book>.Filter.Eq("Title", trimmedSearchTerm),
+                Builders<Book>.Filter.Eq("Language", trimmedSearchTerm),
+                Builders<Book>.Filter.Eq("Publisher", trimmedSearchTerm),
+                Builders<Book>.Filter.AnyEq("Authors", trimmedSearchTerm),
+                Builders<Book>.Filter.AnyEq("Genres", trimmedSearchTerm)
+                );
+
+            // Availability filter (optional)
+            var availabilityFilter = isAvailable.HasValue ?
+                Builders<Book>.Filter.Eq(book => book.IsAvailable, isAvailable.Value) :
+                Builders<Book>.Filter.Empty;
+
+            // Combine both filters
+            var combinedFilter = Builders<Book>.Filter.And(attributeFilter, availabilityFilter);
+
+            return await _collection.Find(combinedFilter, 
+                new FindOptions { Collation = new Collation("en", strength: CollationStrength.Primary) })
+                .CountDocumentsAsync();
         }
         catch (MongoException ex)
         {
