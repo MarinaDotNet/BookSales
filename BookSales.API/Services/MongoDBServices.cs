@@ -80,19 +80,35 @@ public class MongoDBServices
 
     #region Retrieving Data from MongoDB
 
-    ///<summary>Retrieves all books from MongoDB collection asynchronously.</summary>
-    ///<returns>A list of all <see cref="Book"/> entities in the collection.</returns>
-    ///<exception cref="MongoException">Throw when a Mongo-related error occurs.</exception>
-    ///<exception cref="ApplicationException">Thrown when an unexpected error occurs during the operation.</exception>
-    ///<remarks>
-    ///This method fetches all documents from the MongoDB collection and returns them as list.
-    ///Use this method when you need to retrieve every book record from database.
+    /// <summary>
+    /// Retrieves all books from the MongoDB collection, with an optional filter for availability status.
+    /// </summary>
+    /// <remarks>
+    /// This method fetches all books from the MongoDB collection. If an availability status is provided, the method
+    /// only retrieves books that match the specified availability status. If the availability filter is not provided (null),
+    /// all books in the collection are retrieved without filtering by availability.
     /// </remarks>
-    public async Task<List<Book>> GetAllDataAsync()
+    /// <param name="isAvailable">
+    /// An optional boolean value that filters books based on their availability status. If provided, only books that 
+    /// match the specified availability status are returned. If null, no availability filtering is applied.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains a <see cref="List{Book}"/> representing
+    /// the list of books that match the availability filter, or all books if no filter is applied.
+    /// </returns>
+    /// <exception cref="MongoException">
+    /// Thrown when a MongoDB-related error occurs during the data retrieval process.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// Thrown when an unexpected error occurs during the execution of the method.
+    /// </exception>
+    public async Task<List<Book>> GetAllDataAsync(bool? isAvailable)
     {
         try
         {
-            return await _collection.Find(_ => true).ToListAsync();
+            return isAvailable.HasValue ?
+                await _collection.Find(book => book.IsAvailable == isAvailable.Value).ToListAsync() :
+                await _collection.Find(Builders<Book>.Filter.Empty).ToListAsync();
         }
         catch (MongoException ex)
         {
@@ -136,35 +152,6 @@ public class MongoDBServices
         {
             _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
             throw new ApplicationException("An error occured while retreiving the data from database collection. Please try again latter.", ex);
-        }
-    }
-
-    ///<summary>
-    ///Asynchronously retreives a list of books based on their availability status.
-    /// </summary>
-    /// <param name="availabilityStatus"> a boolean indecating whethever to fetch available or unavailable books. </param>
-    /// <returns>
-    /// A task that represents asynchronous operation. The task result contains a list of books matching 
-    /// the specified availability status.
-    /// </returns>
-    /// <exception cref="MongoException">Thrown when a MongoDB-related error occours.</exception>
-    /// <exception cref="ApplicationException">Thrown when an unexpected error occours during the operation.</exception>
-    public async Task<List<Book>> GetBooksByAvailabilityAsync(bool availabilityStatus)
-    {
-        try
-        {
-            var filter = Builders<Book>.Filter.Eq(book => book.IsAvailable, availabilityStatus);
-            return await _collection.Find(filter).ToListAsync();
-        }
-        catch (MongoException ex)
-        {
-            _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
-            throw new MongoException("A Mongo error occured while retreiving the data from database collection.", ex);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError("An error occured while retreiving the data from database collection.");
-            throw new ApplicationException("An error occured while retreiving the data from databse colleciton. Please try again latter.", ex);
         }
     }
 
