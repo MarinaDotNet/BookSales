@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic.FileIO;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System.Text.RegularExpressions;
 
@@ -479,24 +480,22 @@ public class MongoDBServices
     }
 
     /// <summary>
-    /// Asynchronously retrieves a list of books.
+    /// Retrieves all books from the MongoDB collection and sorts them based on the specified order parameter and direction,
+    /// with an optional filter for availability status.
     /// </summary>
-    /// <param name="isAscendingOrder">
-    /// Determines the sorting order; true for ascending, false for descending.
-    /// </param>
-    /// <param name="orderParameter">
-    /// The property by which to order the results. Supported values: "title", "pages", "publisher", "price".
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous operation. The task result contains a sorted list of books.
-    /// </returns>
-    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs.</exception>
-    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the operation.</exception>
-    public async Task<List<Book>> SortAllBooksAsync(bool isAscendingOrder, string orderParameter)
+    /// <param name="isAscendingOrder">A boolean value indicating whether the books should be sorted in ascending order (true) or descending order (false).</param>
+    /// <param name="orderParameter">The attribute by which to sort the books. It must be one of the following: "title", "pages", "publisher", or "price".</param>
+    /// <param name="isAvailable">An optional boolean value that filters books based on their availability status. If null, no availability filtering is applied.</param>
+    /// <returns>A task representing the asynchronous operation. The task result contains a <see cref="List{Book}"/> representing the sorted list of books.</returns>
+    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs during the query or sorting process.</exception>
+    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the execution of the method.</exception>
+    public async Task<List<Book>> SortAllBooksAsync(bool isAscendingOrder, string orderParameter, bool? isAvailable)
     {
         try
         {
-            var books = await _collection.Find(books => true).ToListAsync();
+            var books = isAvailable.HasValue ?
+                await _collection.Find(books => books.IsAvailable == isAvailable.Value).ToListAsync() :
+                await _collection.Find(Builders<Book>.Filter.Empty).ToListAsync();
 
             return SortBooks(books, isAscendingOrder, orderParameter);
         }
@@ -508,43 +507,6 @@ public class MongoDBServices
         catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred while sorting books by the property '{OrderParameter}' and in order '{isAscendingOrder}'.", orderParameter, isAscendingOrder);
-            throw new ApplicationException("An unexpected error occured while sorting books. Please try again latter.", ex);
-        }
-    }
-
-    /// <summary>
-    /// Asynchronously retrieves a list of books that matched specified availability status .
-    /// </summary>
-    /// <param name="isAvailable">
-    /// The availability status of the books to filter by.
-    /// </param>
-    /// <param name="isAscendingOrder">
-    /// Determines the sorting order; true for ascending, false for descending.
-    /// </param>
-    /// <param name="orderParameter">
-    /// The property by which to order the results. Supported values: "title", "pages", "publisher", "price".
-    /// </param>
-    /// <returns>
-    /// A task representing the asynchronous operation. The task result contains a sorted list of books.
-    /// </returns>
-    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs.</exception>
-    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the operation.</exception>
-    public async Task<List<Book>> SortIsAvailableBooksAsync(bool isAvailable, bool isAscendingOrder, string orderParameter)
-    {
-        try
-        {
-            var books = await _collection.Find(books => books.IsAvailable == isAvailable).ToListAsync();
-
-            return SortBooks(books, isAscendingOrder, orderParameter);
-        }
-        catch (MongoException ex)
-        {
-            _logger.LogError(ex, "A MongoDB error accured while sorting books that matched availability status '{IsAvailable}' and by the property '{OrderParameter}' and in order '{isAscendingOrder}'.", isAvailable, orderParameter, isAscendingOrder);
-            throw new MongoException("MongoDB error accured while sorting books. Please try again letter.", ex);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An unexpected error occurred while sorting books that matched availability status '{IsAvailable}' and by the property '{OrderParameter}' and in order '{isAscendingOrder}'.", isAvailable, orderParameter, isAscendingOrder);
             throw new ApplicationException("An unexpected error occured while sorting books. Please try again latter.", ex);
         }
     }
