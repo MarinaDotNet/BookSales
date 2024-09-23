@@ -124,7 +124,7 @@ public class MongoDBServices
 
     ///<summary>Retrieves the book by its unique identifier from the MongoDB collection asynchronously.</summary>
     ///<param name="id">The unique identifier of the book to retrieve.</param>
-    ///<return>The <see cref="Book"/> entity if found; otherwise, <c>null</c>.</return>
+    ///<return>The <see cref="BookDto"/> entity if found; otherwise, <c>null</c>.</return>
     ///<exception cref="ArgumentNullException">Thrown if the <paramref name="id" /> is null or empty.</exception>
     ///<exception cref="MongoException">Thrown when MongoDB-related error occurs.</exception>
     ///<exception cref="ApplicationException">Thrown when unexpected error occurs during the operation</exception>
@@ -581,101 +581,216 @@ public class MongoDBServices
             throw new ApplicationException("An unexpected error occurred while checking if the book exists in the database. Please try again later.", ex);
         }
     }
+
+    /// <summary>
+    /// Fixes an invalid list of strings by replacing it with a default value if the list is empty or contains a null or 
+    /// whitespace entry as the first element.
+    /// </summary>
+    /// <param name="listToCompare">
+    /// The list of strings to be compared. If the list is empty or the first element is null or whitespace, it will be replaced 
+    /// with a list containing a single entry: "undefined".
+    /// </param>
+    /// <returns>
+    /// A <see cref="List{string}"/> containing either the original list (if valid) or a list with a single entry: "undefined".
+    /// </returns>
+    static private List<string> EnsureValidBookList(List<string> listToCompare)
+    {
+        return listToCompare.Count == 0 || string.IsNullOrWhiteSpace(listToCompare[0]) ?
+            ["undefined"] : listToCompare;
+    }
+
+    /// <summary>
+    /// Validates a list of strings to ensure that it contains at least one element and that the first element is not null or whitespace.
+    /// </summary>
+    /// <param name="listValidate">
+    /// The list of strings to validate. The list must contain at least one element, and the first element must not be null or whitespace.
+    /// </param>
+    /// <returns>
+    /// <c>true</c> if the list contains at least one valid element (non-null and non-whitespace); otherwise, <c>false</c>.
+    /// </returns>
+    static private bool IsValidStringList(List<string> listValidate)
+    {
+        return listValidate.Count > 0 && !string.IsNullOrWhiteSpace(listValidate[0]);
+    }
+
+    /// <summary>
+    /// Validates a string to ensure it is not null or whitespace.
+    /// </summary>
+    /// <param name="value">
+    /// The string value to validate.
+    /// </param>
+    /// <param name="fieldName">
+    /// The name of the field being validated. This will be included in the exception message if the validation fails.
+    /// </param>
+    /// <returns>
+    /// The validated string if it is not null or whitespace.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when the provided string is null or consists only of whitespace.
+    /// </exception>
+    static private string ValidateString(string value, string fieldName)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            throw new ArgumentNullException(fieldName, $"The '{fieldName}' cannot be null or empty.");
+        }
+        return value;
+    }
     #endregion Additional Helper Methods
 
     #region Manipulations with Data from DB Collection
     /// <summary>
-    /// Asynchronously adds new book to the database.
+    /// Adds a new book to the MongoDB collection based on the provided <see cref="BookDTO"/> data transfer object.
     /// </summary>
-    /// <param name="book">The book object to add to the databse.</param>
-    /// <returns>The task representing asynchronous opeartion.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when the book object is null.</exception>
-    /// <exception cref="ApplicationException">Thrown when an error occurs during the database operation.</exception>
-    /// <exception cref="MongoException">Throw when MongoDB error occurs during the specific to MongoDb operations.</exception>
     /// <remarks>
-    /// This method inserts a new book into the database. 
-    /// If the <paramref name="book"/> object is null, an <see cref="ArgumentNullException"/> is thrown.
-    /// Any errors occurring during the database operation will be logged, and an <see cref="ApplicationException"/> will be thrown.
+    /// This method validates the fields from the <see cref="BookDTO"/> before creating and inserting the new book into the MongoDB collection.
+    /// If any validation fails, it throws the appropriate exception. The method handles database-related errors and logs them accordingly.
     /// </remarks>
-    public async Task AddBookAsync(Book book)
+    /// <param name="bookDto">
+    /// The <see cref="BookDTO"/> object containing the data for the new book. This includes properties such as Title, Authors, Annotation, Genres,
+    /// Language, Link, Price, Pages, Publisher, and IsAvailable.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the newly added <see cref="Book"/> object if the operation succeeds.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown when any required property in the <see cref="BookDTO"/> is null or empty.
+    /// </exception>
+    /// <exception cref="ArithmeticException">
+    /// Thrown when the Price or Pages values are invalid (less than or equal to 0).
+    /// </exception>
+    /// <exception cref="MongoException">
+    /// Thrown when a MongoDB-related error occurs while inserting the book into the database.
+    /// </exception>
+    /// <exception cref="ApplicationException">
+    /// Thrown when any unexpected error occurs during the execution of the method.
+    /// </exception>
+    public async Task<Book> AddBookAsync(BookDTO bookDto)
     {
-        if(book == null)
+        if(bookDto == null)
         {
-            throw new ArgumentNullException(nameof(book), "The book object cannot be null.");
+            throw new ArgumentNullException(nameof(bookDto), "The book object cannot be null.");
         }
 
         try
         {
+            Book book = new()
+            {
+                Title = ValidateString(bookDto.Title, nameof(bookDto.Title)),
+                Authors = IsValidStringList(bookDto.Authors!) ?
+                bookDto.Authors! :
+                throw new ArgumentNullException(nameof(bookDto)),
+                Annotation = ValidateString(bookDto.Annotation, nameof(bookDto.Annotation)),
+                Genres = IsValidStringList(bookDto.Genres!) ?
+                bookDto.Genres! :
+                throw new ArgumentNullException(nameof(bookDto)),
+                Language = ValidateString(bookDto.Language, nameof(bookDto.Language)),
+                Link = string.IsNullOrWhiteSpace(bookDto.Link!.ToString()) ?
+                new Uri("about:blank") : bookDto.Link,
+                Price = bookDto.Price > 0 ?
+                bookDto.Price :
+                throw new ArithmeticException(nameof(bookDto)),
+                Pages = bookDto.Pages > 0 ?
+                bookDto.Pages :
+                throw new ArithmeticException(nameof(bookDto)),
+                Publisher = ValidateString(bookDto.Publisher, nameof(bookDto.Publisher)),
+                IsAvailable = bookDto.IsAvailable
+            };
+
             await _collection.InsertOneAsync(book);
+            return book;
         }
         catch (MongoException ex)
         {
-            _logger.LogError(ex, "A MongoDB error occurred while adding a new book with ID '{BookId}'.", book.Id);
+            _logger.LogError(ex, "A MongoDB error occurred while adding a new book.");
             throw new MongoException("A MongoDB error occurred while adding a new book. Please try again later.", ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while adding a new book with ID '{BookId}'.", book.Id);
+            _logger.LogError(ex, "An unexpected error occurred while adding a new book.");
             throw new ApplicationException("An unexpected error occurred while adding a new book. Please try again later.", ex);
         }
     }
 
     /// <summary>
-    /// Asynchronously updates a book in the database.
+    /// Updates an existing book in the database based on the provided <see cref="BookDTO"/> and book ID.
+    /// Returns the previous version of the book and the updated version.
     /// </summary>
-    /// <param name="book">The book object containing updated information.</param>
+    /// <param name="bookDto">
+    /// The <see cref="BookDTO"/> object containing the updated data for the book. Fields such as Title, Authors, Annotation, Genres,
+    /// Language, Link, Price, Pages, Publisher, and IsAvailable will be updated if provided. If a field is not provided, its previous value will be retained.
+    /// </param>
+    /// <param name="id">
+    /// The unique 24-character identifier (ID) of the book to update.
+    /// </param>
     /// <returns>
-    /// A task representing the asynchronous operation.
+    /// A task that returns a tuple containing the previous version of the book (<see cref="Book"/> previousBook) and the updated version (<see cref="Book"/> updatedBook).
     /// </returns>
     /// <exception cref="ArgumentNullException">
-    /// Thrown when the book is null or its ID is null or whitespace.
+    /// Thrown if the provided <paramref name="bookDto"/> is null or if the <paramref name="id"/> is null or empty.
     /// </exception>
     /// <exception cref="InvalidOperationException">
-    /// Thrown when the specified book does not exist in the database.
+    /// Thrown if the book with the provided <paramref name="id"/> does not exist in the database or if an error occurs during the update process.
     /// </exception>
-    /// <exception cref="MongoException">Throw when MongoDB error occurs during the specific to MongoDb operations.</exception>
+    /// <exception cref="MongoException">
+    /// Thrown when a MongoDB-related error occurs during the update operation.
+    /// </exception>
     /// <exception cref="ApplicationException">
-    /// Thrown when an error occurs during the database operation.
+    /// Thrown when an unexpected error occurs during the update process.
     /// </exception>
-    ///  <remarks>
-    /// This method updates an existing book in the database.
-    /// It first checks if the book exists using <see cref="IsBookExistsAsync"/>.
-    /// If the book does not exist, an <see cref="InvalidOperationException"/> is thrown.
-    /// Any MongoDB or unexpected errors will be logged, and an <see cref="ApplicationException"/> will be thrown.
-    /// </remarks>
-    public async Task UpdateBookAsync(Book book)
+    public async Task<(Book previousBook, Book updatedBook)> UpdateBookAsync(BookDTO bookDto, string id)
     {
-        if (book == null || string.IsNullOrWhiteSpace(book.Id))
+        if (bookDto == null || string.IsNullOrWhiteSpace(id))
         {
-            throw new ArgumentNullException(nameof(book), "The book object or its 'ID' cannot be null or empty.");
+            throw new ArgumentNullException(
+                bookDto == null ? nameof(bookDto) : nameof(id), 
+                "The book object or its 'ID' cannot be null or empty.");
         }
         try
         {
             // Check if the book exists in the database
-            bool exists = await IsBookExistsAsync(book.Id);
+            bool exists = await IsBookExistsAsync(id);
 
             if (!exists)
             {
-                throw new InvalidOperationException($"The specified book with ID '{book.Id}' was not found in the database.");
+                throw new InvalidOperationException($"The specified book with ID '{id}' was not found in the database.");
             }
-            // Update the book in the database using a filter
-            var filter = Builders<Book>.Filter.Eq(b => b.Id, book.Id);
-            var result = await _collection.ReplaceOneAsync(filter, book);
 
-            if (result.MatchedCount == 0)
+            var bookCurrent = await _collection.Find(book => book.Id == id).FirstOrDefaultAsync();
+
+            Book book = new()
             {
-                throw new InvalidOperationException($"The specified book with ID '{book.Id}' was not found in the database.");
-            }
+                Id = id,
+                Title = string.IsNullOrWhiteSpace(bookDto.Title) ?
+                bookCurrent.Title : bookDto.Title,
+                Authors = IsValidStringList(bookDto.Authors) ?
+                 bookDto.Authors : EnsureValidBookList(bookCurrent.Authors),
+                Annotation = string.IsNullOrWhiteSpace(bookDto.Annotation) ? bookCurrent.Annotation : bookDto.Annotation,
+                Genres = IsValidStringList(bookDto.Genres) ?
+                bookDto.Genres : EnsureValidBookList(bookCurrent.Genres),
+                Language = string.IsNullOrWhiteSpace(bookDto.Language) ? bookCurrent.Language : bookDto.Language,
+                Link = bookDto.Link!.IsAbsoluteUri ? bookDto.Link : bookCurrent.Link,
+                Price = bookDto.Price > 0 ? bookDto.Price : bookCurrent.Price,
+                Pages = bookDto.Pages > 0 ? bookDto.Pages : bookCurrent.Pages,
+                Publisher = string.IsNullOrWhiteSpace(bookDto.Publisher) ? bookCurrent.Publisher : bookDto.Publisher,
+                IsAvailable = bookDto.IsAvailable
+            };
 
+            // Update the book in the database using a filter
+            var filter = Builders<Book>.Filter.Eq(b => b.Id, id);
+            var previousBook = await _collection.FindOneAndReplaceAsync(filter, book) ?? 
+                throw new InvalidOperationException($"Failed to update the book with ID '{id}'. An error occurred while processing the request.");
+            
+            return (previousBook, book);
         }
         catch (MongoException ex)
         {
-            _logger.LogError(ex, "A MongoDB error occurred while updating the book with ID '{BookId}'.", book.Id);
+            _logger.LogError(ex, $"A MongoDB error occurred while updating the book with ID '{id}'.");
             throw new MongoException("A MongoDB error occurred while updating the book. Please try again later.", ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An unexpected error occurred while updating the book with ID '{BookId}'.", book.Id);
+            _logger.LogError(ex, $"An unexpected error occurred while updating the book with ID '{id}'.");
             throw new ApplicationException("An unexpected error occurred while updating the book. Please try again later.", ex);
         }
     }
@@ -695,7 +810,7 @@ public class MongoDBServices
     /// If the book does not exist, an <see cref="InvalidOperationException"/> is thrown.
     /// Any MongoDB or unexpected errors will be logged, and an <see cref="ApplicationException"/> will be thrown.
     /// </remarks>
-    public async Task DeleteBookByIdAsync(string bookId)
+    public async Task<Book> DeleteBookByIdAsync(string bookId)
     {
         if (string.IsNullOrWhiteSpace(bookId))
         {
@@ -709,12 +824,10 @@ public class MongoDBServices
                 throw new InvalidOperationException($"The specified book with ID '{bookId}' was not found in database.");
             }
 
-            var result = await _collection.FindOneAndDeleteAsync(book => book.Id!.Equals(bookId));
-
-            if (result == null)
-            {
-                throw new InvalidOperationException($"The specified book with ID '{bookId}' was not found in database.");
-            }
+            var result = await _collection.FindOneAndDeleteAsync(book => book.Id!.Equals(bookId)) ?? 
+                throw new InvalidOperationException($"Failed to delete the book with ID '{bookId}'. An error occurred while processing the request.");
+            
+            return result;
         }
         catch (MongoException ex)
         {
