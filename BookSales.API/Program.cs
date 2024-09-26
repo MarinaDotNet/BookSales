@@ -12,7 +12,8 @@ builder.Services
     .AddApiVersioning(options =>
     {
         options.ReportApiVersions = true;
-        options.AssumeDefaultVersionWhenUnspecified = false;
+        options.AssumeDefaultVersionWhenUnspecified = true;
+        options.DefaultApiVersion = new ApiVersion(3, 0);
         options.ApiVersionReader = new HeaderApiVersionReader("Api-Version");
     })
     .AddApiExplorer(options =>
