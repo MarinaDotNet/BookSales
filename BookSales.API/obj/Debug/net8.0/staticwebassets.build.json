@@ -1,8 +1,8 @@
 {
   "Version": 1,
-  "Hash": "LDV4+O9hgymV/0vK1TVYVYXGk5ECX1S0UgOEzH0iv7c=",
-  "Source": "BookSales.API",
-  "BasePath": "_content/BookSales.API",
+  "Hash": "Hcy9U6MdCcmVoy3m6IUcUJA8X+lE309ppMEG7v7NO2s=",
+  "Source": "BooksStock.API",
+  "BasePath": "_content/BooksStock.API",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],

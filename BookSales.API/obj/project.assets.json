@@ -1895,9 +1895,9 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BookSales.API.csproj",
-      "projectName": "BookSales.API",
-      "projectPath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BookSales.API.csproj",
+      "projectUniqueName": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BooksStock.API.csproj",
+      "projectName": "BooksStock.API",
+      "projectPath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BooksStock.API.csproj",
       "packagesPath": "C:\\Users\\msich\\.nuget\\packages\\",
       "outputPath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\obj\\",
       "projectStyle": "PackageReference",

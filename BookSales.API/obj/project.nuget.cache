@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "S/TabYy4GHQ=",
+  "dgSpecHash": "pusku1/L8tc=",
   "success": true,
-  "projectFilePath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BookSales.API.csproj",
+  "projectFilePath": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookSales.API\\BooksStock.API.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\msich\\.nuget\\packages\\asp.versioning.abstractions\\8.1.0\\asp.versioning.abstractions.8.1.0.nupkg.sha512",
     "C:\\Users\\msich\\.nuget\\packages\\asp.versioning.http\\8.1.0\\asp.versioning.http.8.1.0.nupkg.sha512",
