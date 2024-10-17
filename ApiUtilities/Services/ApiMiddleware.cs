@@ -1,4 +1,5 @@
-﻿using ApiUtilities.Services.ApiKey;
+﻿using ApiUtilities.Constants;
+using ApiUtilities.Services.ApiKey;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net;
@@ -36,10 +37,10 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
         try
         {
             // Check if the StockApiKey header is present
-            if (!context.Request.Headers.TryGetValue("StockApiKey", out var userApiKey) ||
+            if (!context.Request.Headers.TryGetValue(SecurityConstants.AuthApiKey, out var userApiKey) ||
                 string.IsNullOrWhiteSpace(userApiKey))
             {
-                await LogError((int)HttpStatusCode.BadRequest, "Missing Stock API key.", context);
+                await LogError((int)HttpStatusCode.BadRequest, "Missing API key.", context);
                 return;
             }
 
