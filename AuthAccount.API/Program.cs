@@ -1,14 +1,30 @@
 using AuthAccount.API.Constants;
 using AuthAccount.API.Models;
 using AuthAccount.API.Services;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Writers;
+using Asp.Versioning;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Configuration.AddUserSecrets<StartupBase>();
+
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+builder.Services
+    .AddApiVersioning(options =>
+    {
+        options.ReportApiVersions = true;
+        options.AssumeDefaultVersionWhenUnspecified = false;
+        options.ApiVersionReader = new HeaderApiVersionReader("Api-Version");
+    })
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat = "'v'VVV";
+        options.SubstituteApiVersionInUrl = true;
+    });
 
 builder.Services.AddControllers();
 
@@ -40,6 +56,7 @@ using(var scope = app.Services.CreateScope())
 }
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
