@@ -141,3 +141,11 @@ C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.AP
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\obj\Debug\net8.0\AuthAccount.API.pdb
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\obj\Debug\net8.0\AuthAccount.API.genruntimeconfig.cache
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\obj\Debug\net8.0\ref\AuthAccount.API.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Asp.Versioning.Abstractions.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Asp.Versioning.Http.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Asp.Versioning.Mvc.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Asp.Versioning.Mvc.ApiExplorer.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\DnsClient.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Newtonsoft.Json.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\SendGrid.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\StarkbankEcdsa.dll

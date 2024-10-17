@@ -1,6 +1,8 @@
 ﻿using Asp.Versioning;
 using BookSales.API.Models;
 using BookSales.API.Services;
+using BooksStock.API.Models;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
 using System.ComponentModel.DataAnnotations;
@@ -30,6 +32,7 @@ namespace BookSales.API.Controllers;
 [ApiVersion("1")]
 [Produces("application/json")]
 [Consumes("application/json")]
+[EnableCors(PolicyName="MyAdministrationPolicy")]
 public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ?? 
@@ -677,6 +680,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
 [ApiVersion("2")]
 [Produces("application/json")]
 [Consumes("application/json")]
+[EnableCors(PolicyName = "MyUserPolicy")]
 public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ?? 
@@ -1135,6 +1139,7 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
 [ApiVersion("3")]
 [Produces("application/json")]
 [Consumes("application/json")]
+[EnableCors(PolicyName = "MyUserPolicy")]
 public class StockV3Controller(MongoDBServices service, ILogger<StockV3Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ??

@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Internal;
 using Amazon.Runtime.Internal.Transform;
 using BooksStock.API.Services;
+using Microsoft.AspNetCore.Builder;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,31 @@ builder.Services.AddSingleton<MongoDBServices>();
 //Adding services for Api Middleware
 builder.Services.AddTransient<IApiKeyValidator, ApiKeyValidator>();
 builder.Services.AddHttpContextAccessor();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("MyAdministrationPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:7201")
+        .WithHeaders("Api-Version", "StockApiKey")
+        .SetIsOriginAllowed(origin => false)
+        .AllowAnyMethod()
+        .DisallowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromMinutes(30));
+    });
+
+    options.AddPolicy("MyUserPolicy", policy =>
+    {
+        policy.WithOrigins("https://localhost:7201")
+        .WithHeaders("Api-Version", "StockApiKey")
+        .SetIsOriginAllowed(origin => false)
+        .WithMethods("GET")
+        .DisallowCredentials()
+        .SetPreflightMaxAge(TimeSpan.FromHours(3));
+    });
+
+    options.DefaultPolicyName = "MyUserPolicy";
+});
 
 builder.Services
     .AddApiVersioning(options =>
@@ -67,6 +93,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseCors("MyUserPolicy");
 
 app.UseHttpsRedirection();
 
