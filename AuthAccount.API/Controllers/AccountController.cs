@@ -656,8 +656,8 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
 
         return new JwtSecurityToken
         (
-            issuer: _configuration[SecurityConstants.TokenValidIssuerKey],
-            audience: _configuration[SecurityConstants.TokenValidAudienceKey],
+            issuer: _configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidIssuerKey],
+            audience: _configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidAudienceKey],
             expires: DateTime.Now.AddHours(3),
             claims: claims,
             signingCredentials: new SigningCredentials(signInKey, SecurityAlgorithms.HmacSha256Signature)
