@@ -9,10 +9,14 @@
 
   <ItemGroup>
     <PackageReference Include="Asp.Versioning.Mvc.ApiExplorer" Version="8.1.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.8" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.10" />
     <PackageReference Include="MongoDB.Driver" Version="2.29.0" />
     <PackageReference Include="MongoDB.Driver.Core" Version="2.29.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.8.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\ApiUtilities\ApiUtilities.csproj" />
   </ItemGroup>
 
 </Project>

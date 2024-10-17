@@ -1,7 +1,9 @@
-﻿using BooksStock.API.Services.ApiKey;
+﻿using ApiUtilities.Services.ApiKey;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System.Net;
 
-namespace BooksStock.API.Services;
+namespace ApiUtilities.Services;
 
 /// <summary>
 /// Middleware for validating the API key and API version from the incoming request.
@@ -16,10 +18,10 @@ namespace BooksStock.API.Services;
 public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidator, ILogger<ApiMiddleware> logger)
 {
     private readonly RequestDelegate _next = next ??
-        throw new ArgumentNullException(nameof(next), "Request cannot be null.");  
+        throw new ArgumentNullException(nameof(next), "Request cannot be null.");
     private readonly IApiKeyValidator _apiKeyValidator = apiKeyValidator ??
         throw new ArgumentNullException(nameof(apiKeyValidator), "IApiKeyValidator cannot be null.");
-    private readonly ILogger<ApiMiddleware> _logger = logger ?? 
+    private readonly ILogger<ApiMiddleware> _logger = logger ??
         throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 
     /// <summary>
@@ -29,7 +31,7 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
     /// </summary>
     /// <param name="context">The <see cref="HttpContext"/> representing the current HTTP request.</param>
     /// <returns>A task that represents the asynchronous middleware operation.</returns>
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(Microsoft.AspNetCore.Http.HttpContext context)
     {
         try
         {
@@ -37,7 +39,7 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
             if (!context.Request.Headers.TryGetValue("StockApiKey", out var userApiKey) ||
                 string.IsNullOrWhiteSpace(userApiKey))
             {
-               await LogError((int)HttpStatusCode.BadRequest, "Missing Stock API key.", context);
+                await LogError((int)HttpStatusCode.BadRequest, "Missing Stock API key.", context);
                 return;
             }
 
@@ -46,14 +48,14 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
                 !decimal.TryParse(apiVersionHeader, out decimal version) &&
                 (version != 1 && version != 2 && version != 3))
             {
-               await LogError((int)HttpStatusCode.ExpectationFailed, "Invalid or missing API version.", context);
+                await LogError((int)HttpStatusCode.ExpectationFailed, "Invalid or missing API version.", context);
                 return;
             }
 
             // Validate the provided API key
             if (!_apiKeyValidator.IsValid(userApiKey!))
             {
-               await LogError((int)HttpStatusCode.Unauthorized, "Unauthorized: Invalid API key.", context);
+                await LogError((int)HttpStatusCode.Unauthorized, "Unauthorized: Invalid API key.", context);
                 return;
             }
 
@@ -63,7 +65,7 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
         catch (Exception ex)
         {
             // Log the exception and return a 500 Internal Server Error response
-          await  LogError((int)HttpStatusCode.InternalServerError, $"Server error: {ex.Message}", context);
+            await LogError((int)HttpStatusCode.InternalServerError, $"Server error: {ex.Message}", context);
             return;
         }
     }
@@ -77,12 +79,12 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
     /// <returns>A task that represents the asynchronous logging and response writing operation.</returns>
     private async Task LogError(int statusCode, string message, HttpContext context)
     {
-        context.Response.Clear();
+        //context.Response.Clear();
 
         context.Response.StatusCode = statusCode;
         context.Response.ContentType = "application/json";
 
-        var errorResponse = new {StatusCode = statusCode, Message = message};
+        var errorResponse = new { StatusCode = statusCode, Message = message };
         await context.Response.WriteAsync(System.Text.Json.JsonSerializer.Serialize(errorResponse));
 
         _logger.LogError("Error {StatusCode}: {Message} at {Path}", statusCode, message, context.Request.Path);

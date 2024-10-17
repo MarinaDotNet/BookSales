@@ -1,4 +1,4 @@
-﻿namespace BookSales.API.Services;
+﻿namespace BooksStock.API.Services;
 
 /// <summary>
 /// Represent the settings required to connect to a MongoDB database.
@@ -11,6 +11,6 @@
 public class MongoDBSettings
 {
     public string ConnectionString { get; set; } = string.Empty!;
-    public string DatabaseName { get; set;} = string.Empty!;
+    public string DatabaseName { get; set; } = string.Empty!;
     public string CollectionName { get; set; } = string.Empty!;
 }

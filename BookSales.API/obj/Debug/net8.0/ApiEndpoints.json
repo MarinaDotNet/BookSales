@@ -1,0 +1,695 @@
+[
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "PostNewBookAsync",
+    "RelativePath": "add",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookDto",
+        "Type": "BooksStock.API.Models.BookDTO",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "BooksStock.API.Models.Book",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetAllBooksAsync",
+    "RelativePath": "all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetAllBooksAsync",
+    "RelativePath": "all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV3Controller",
+    "Method": "GetAllBooksAsync",
+    "RelativePath": "all",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetTotalBooksCountAsync",
+    "RelativePath": "all/count",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetTotalBooksCountAsync",
+    "RelativePath": "all/count",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV3Controller",
+    "Method": "GetTotalBooksCountAsync",
+    "RelativePath": "all/count",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetBooksByExactMatchAsync",
+    "RelativePath": "all/match/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ascendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "isAvailbale",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetBooksByExactMatchAsync",
+    "RelativePath": "all/match/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ascendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetBooksByPartialMatch",
+    "RelativePath": "all/partialmatch/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ascendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "isAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetBooksByPartialMatch",
+    "RelativePath": "all/partialmatch/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "ascendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetAllBooksSortedAsync",
+    "RelativePath": "all/sort",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAscendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "isAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetAllBooksSortedAsync",
+    "RelativePath": "all/sort",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAscendingOrder",
+        "Type": "System.Boolean",
+        "IsRequired": false
+      },
+      {
+        "Name": "orderParameter",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "GetBookByIdAsync",
+    "RelativePath": "book/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "BooksStock.API.Models.Book",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "GetBookByIdAsync",
+    "RelativePath": "book/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "BooksStock.API.Models.Book",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "CountBooksByAvailabilityAsync",
+    "RelativePath": "books/count/availability/{isAvailable}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "isAvailable",
+        "Type": "System.Boolean",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "CountBooksByMatchAsync",
+    "RelativePath": "books/count/match/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "isAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "CountBooksByMatchAsync",
+    "RelativePath": "books/count/match/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "CountBooksByPartialMatchAsync",
+    "RelativePath": "books/count/partialmatch/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "isAvailable",
+        "Type": "System.Nullable\u00601[[System.Boolean, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV2Controller",
+    "Method": "CountBooksByPartialMatchAsync",
+    "RelativePath": "books/count/partialmatch/{condition}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "condition",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Int64",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "DeleteBookAsync",
+    "RelativePath": "delete",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "BooksStock.API.Models.Book",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "BooksStock.API.Controllers.StockV1Controller",
+    "Method": "PutBookAsync",
+    "RelativePath": "update",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "bookDto",
+        "Type": "BooksStock.API.Models.BookDTO",
+        "IsRequired": true
+      },
+      {
+        "Name": "id",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "BooksStock.API.Models.Book",
+        "MediaTypes": [
+          "application/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  }
+]

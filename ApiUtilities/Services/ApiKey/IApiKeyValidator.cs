@@ -1,4 +1,4 @@
-﻿namespace BooksStock.API.Services.ApiKey;
+﻿namespace ApiUtilities.Services.ApiKey;
 
 /// <summary>
 /// Defines a contract for validating API keys used for accessing secured API endpoints.

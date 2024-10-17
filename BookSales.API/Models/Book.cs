@@ -3,7 +3,7 @@ using MongoDB.Bson.Serialization.Attributes;
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore;
 
-namespace BookSales.API.Models;
+namespace BooksStock.API.Models;
 /// <summary>
 /// Represents a book entity with various attributes for storing in a MongoDB collection.
 /// </summary>
@@ -28,7 +28,7 @@ public class Book
     /// <remarks>This property is stored in the MongoDB document as the "title" element.</remarks>
     [BsonElement("title")]
     [BsonRepresentation(BsonType.String)]
-    public string Title { get; set;  } = string.Empty!;
+    public string Title { get; set; } = string.Empty!;
 
     ///<summary>Gets or sets the list of authors for the book.</summary>
     ///<remarks>This property is stored as an array in the MongoDB document under the "authors" element.</remarks>

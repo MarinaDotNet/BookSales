@@ -1,0 +1,13 @@
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\bin\Debug\net8.0\ApiUtilities.deps.json
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\bin\Debug\net8.0\ApiUtilities.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\bin\Debug\net8.0\ApiUtilities.pdb
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.AssemblyInfoInputs.cache
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.AssemblyInfo.cs
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.csproj.CoreCompileInputs.cache
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.sourcelink.json
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\refint\ApiUtilities.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.pdb
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ref\ApiUtilities.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\ApiUtilities\obj\Debug\net8.0\ApiUtilities.csproj.AssemblyReference.cache

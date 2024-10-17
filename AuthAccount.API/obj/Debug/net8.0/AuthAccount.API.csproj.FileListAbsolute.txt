@@ -149,3 +149,10 @@ C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.AP
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Newtonsoft.Json.dll
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\SendGrid.dll
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\StarkbankEcdsa.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\ApiUtilities.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\ApiUtilities.pdb
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Microsoft.Extensions.Caching.Memory.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Microsoft.Extensions.Logging.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\AuthAccount.API\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll

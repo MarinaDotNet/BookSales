@@ -1,5 +1,4 @@
-﻿using BookSales.API.Models;
-using BooksStock.API.Models;
+﻿using BooksStock.API.Models;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualBasic.FileIO;
@@ -8,7 +7,7 @@ using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using System.Text.RegularExpressions;
 
-namespace BookSales.API.Services;
+namespace BooksStock.API.Services;
 
 /// <summary>
 /// Provides services for interacting with MongoDB collections, specifically for managing class <see cref="Book"/> entities.
@@ -38,7 +37,7 @@ public class MongoDBServices
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
 
         //Validate MongoDB settings
-        var mongoDBSettings = settings.Value ?? 
+        var mongoDBSettings = settings.Value ??
             throw new ArgumentNullException(nameof(settings), "MongoDB settings cannot be null.");
 
         ValidateMongoDBSettings(mongoDBSettings);
@@ -372,7 +371,7 @@ public class MongoDBServices
             // Combine both filters
             var combinedFilter = Builders<Book>.Filter.And(attributeFilter, availabilityFilter);
 
-            return await _collection.Find(combinedFilter, 
+            return await _collection.Find(combinedFilter,
                 new FindOptions { Collation = new Collation("en", strength: CollationStrength.Primary) })
                 .CountDocumentsAsync();
         }
@@ -668,7 +667,7 @@ public class MongoDBServices
     /// </exception>
     public async Task<Book> AddBookAsync(BookDTO bookDto)
     {
-        if(bookDto == null)
+        if (bookDto == null)
         {
             throw new ArgumentNullException(nameof(bookDto), "The book object cannot be null.");
         }
@@ -744,7 +743,7 @@ public class MongoDBServices
         if (bookDto == null || string.IsNullOrWhiteSpace(id))
         {
             throw new ArgumentNullException(
-                bookDto == null ? nameof(bookDto) : nameof(id), 
+                bookDto == null ? nameof(bookDto) : nameof(id),
                 "The book object or its 'ID' cannot be null or empty.");
         }
         try
@@ -779,9 +778,9 @@ public class MongoDBServices
 
             // Update the book in the database using a filter
             var filter = Builders<Book>.Filter.Eq(b => b.Id, id);
-            var previousBook = await _collection.FindOneAndReplaceAsync(filter, book) ?? 
+            var previousBook = await _collection.FindOneAndReplaceAsync(filter, book) ??
                 throw new InvalidOperationException($"Failed to update the book with ID '{id}'. An error occurred while processing the request.");
-            
+
             return (previousBook, book);
         }
         catch (MongoException ex)
@@ -825,9 +824,9 @@ public class MongoDBServices
                 throw new InvalidOperationException($"The specified book with ID '{bookId}' was not found in database.");
             }
 
-            var result = await _collection.FindOneAndDeleteAsync(book => book.Id!.Equals(bookId)) ?? 
+            var result = await _collection.FindOneAndDeleteAsync(book => book.Id!.Equals(bookId)) ??
                 throw new InvalidOperationException($"Failed to delete the book with ID '{bookId}'. An error occurred while processing the request.");
-            
+
             return result;
         }
         catch (MongoException ex)

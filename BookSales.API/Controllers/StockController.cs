@@ -1,7 +1,6 @@
 ﻿using Asp.Versioning;
-using BookSales.API.Models;
-using BookSales.API.Services;
 using BooksStock.API.Models;
+using BooksStock.API.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -9,7 +8,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 
 
-namespace BookSales.API.Controllers;
+namespace BooksStock.API.Controllers;
 /// <summary>
 /// StockController provides access to book data stored in MongoDB through three API versions.
 /// </summary>
@@ -32,10 +31,10 @@ namespace BookSales.API.Controllers;
 [ApiVersion("1")]
 [Produces("application/json")]
 [Consumes("application/json")]
-[EnableCors(PolicyName="MyAdministrationPolicy")]
+[EnableCors(PolicyName = "MyAdministrationPolicy")]
 public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controller> logger) : ControllerBase
 {
-    private readonly MongoDBServices _service = service ?? 
+    private readonly MongoDBServices _service = service ??
         throw new ArgumentNullException(nameof(service), "MongoDB service cannot be null or empty.");
     private readonly ILogger<StockV1Controller> _logger = logger ??
         throw new ArgumentNullException(nameof(logger), "Logger cannot be null or empty.");
@@ -68,8 +67,8 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
         {
             var books = await _service.GetAllDataAsync(isAvailable);
 
-            return books.Count != 0 ? 
-                Ok(books) : 
+            return books.Count != 0 ?
+                Ok(books) :
                 NotFound("No books found in the database.");
         }
         catch (ApplicationException ex)
@@ -112,14 +111,14 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     {
         try
         {
-            if(string.IsNullOrWhiteSpace(id))
+            if (string.IsNullOrWhiteSpace(id))
             {
                 return BadRequest("The ID cannot be null or empty.");
             }
             var book = await _service.GetBookByIdAsync(id);
 
-            return book is null ? 
-                NotFound($"The book with ID '{id}' was not found in database.") : 
+            return book is null ?
+                NotFound($"The book with ID '{id}' was not found in database.") :
                 Ok(book);
         }
         catch (ApplicationException ex)
@@ -180,21 +179,21 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
     [HttpGet("all/match/{condition}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetBooksByExactMatchAsync(
-        [Required]string condition, bool ascendingOrder = false, 
-        [RegularExpression("^(?i)(title|pages|publisher|price)$", 
+        [Required] string condition, bool ascendingOrder = false,
+        [RegularExpression("^(?i)(title|pages|publisher|price)$",
         ErrorMessage = "The order parameter must be one of the following: 'title', 'pages', 'publisher', 'price'.")] string orderParameter = "price", bool? isAvailbale = null)
     {
         try
         {
             var books = await _service.GetBooksByExactMatchAsync(condition, ascendingOrder, orderParameter);
 
-            if(isAvailbale.HasValue)
+            if (isAvailbale.HasValue)
             {
                 books = books.Where(book => book.IsAvailable == isAvailbale).ToList();
             }
 
             return books.Count > 0 ?
-            Ok(books) : 
+            Ok(books) :
                 NotFound("No books found matching the given condition.");
         }
         catch (ApplicationException ex)
@@ -254,20 +253,20 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     [HttpGet("all/partialmatch/{condition}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetBooksByPartialMatch(
         [Required] string condition, bool ascendingOrder = false,
-        [RegularExpression("^(?i)(title|pages|publisher|price)$", 
+        [RegularExpression("^(?i)(title|pages|publisher|price)$",
         ErrorMessage = "The order parameter must be one of the following: 'title', 'pages', 'publisher', 'price'.")] string orderParameter = "price", bool? isAvailable = null)
     {
         try
         {
             var books = await _service.GetBooksByPartialMatchAsync(condition, ascendingOrder, orderParameter);
 
-            if(isAvailable.HasValue)
+            if (isAvailable.HasValue)
             {
                 books = books.Where(book => book.IsAvailable == isAvailable).ToList();
             }
 
             return books.Count > 0 ?
-                Ok(books) : 
+                Ok(books) :
                 NotFound("No books found matching the given condition.");
         }
         catch (ApplicationException ex)
@@ -315,7 +314,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     /// <response code="404">Returns if no books are found with the given sorting or filtering criteria.</response>
     /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
     [HttpGet("all/sort")]
-    public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksSortedAsync(bool isAscendingOrder, 
+    public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksSortedAsync(bool isAscendingOrder,
         [RegularExpression("^(?i)(title|pages|publisher|price)$",
         ErrorMessage = "The order parameter must be one of the following: 'title' 'pages', 'publisher, 'price'.")] string orderParameter = "price",
         bool? isAvailable = null)
@@ -325,7 +324,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
             var books = await _service.SortAllBooksAsync(isAscendingOrder, orderParameter, isAvailable);
 
             return books.Count > 0 ?
-                Ok(books) : 
+                Ok(books) :
                 NotFound("No books found with the specified sorting criteria.");
         }
         catch (ApplicationException ex)
@@ -458,7 +457,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     /// <response code="200">Returns the total count of books that match the search term.</response>
     /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
     [HttpGet("books/count/match/{condition}")]
-    public async Task<ActionResult<long>> CountBooksByMatchAsync([Required]string condition, bool? isAvailable = null)
+    public async Task<ActionResult<long>> CountBooksByMatchAsync([Required] string condition, bool? isAvailable = null)
     {
         try
         {
@@ -558,8 +557,8 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     {
         try
         {
-           var result = await _service.AddBookAsync(bookDto);
-           return result != null ? Ok(result) : BadRequest(result);
+            var result = await _service.AddBookAsync(bookDto);
+            return result != null ? Ok(result) : BadRequest(result);
         }
         catch (ApplicationException ex)
         {
@@ -599,8 +598,8 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
         try
         {
             var result = await _service.UpdateBookAsync(bookDto, id);
-            return result.previousBook == null || result.updatedBook == null ? 
-                BadRequest(result) : 
+            return result.previousBook == null || result.updatedBook == null ?
+                BadRequest(result) :
                 Ok(new
                 {
                     Message = "Updated successfully",
@@ -647,7 +646,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
             var result = await _service.DeleteBookByIdAsync(id);
             return result == null ? BadRequest(result) : Ok(result);
         }
-        catch(ApplicationException ex)
+        catch (ApplicationException ex)
         {
             _logger.LogError(ex, "An error occurred while processing the request.");
             return StatusCode(StatusCodes.Status500InternalServerError, new
@@ -655,7 +654,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
                 message = ex.Message
             });
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "An unexpected error occurred.");
             return StatusCode(StatusCodes.Status500InternalServerError, new
@@ -683,7 +682,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
 [EnableCors(PolicyName = "MyUserPolicy")]
 public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controller> logger) : ControllerBase
 {
-    private readonly MongoDBServices _service = service ?? 
+    private readonly MongoDBServices _service = service ??
         throw new ArgumentNullException(nameof(service), "MongoDB service cannot be null or empty.");
     private readonly ILogger<StockV2Controller> _logger = logger ??
         throw new ArgumentNullException(nameof(logger), "Logger cannot be null or empty.");
@@ -764,7 +763,7 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
 
             return book is null ?
                 NotFound($"The book with ID '{id}' was not found in database.") :
-                book.IsAvailable == false ? 
+                book.IsAvailable == false ?
                 BadRequest($"The book with ID '{id}' is not available in the store at this time.") :
                 Ok(book);
         }
@@ -1169,7 +1168,7 @@ public class StockV3Controller(MongoDBServices service, ILogger<StockV3Controlle
         try
         {
             var books = (await _service.SortAllBooksAsync(false, "price", true)).Take(5).ToList();
-            
+
             return books.Count != 0 ?
                 Ok(books) :
                 NotFound("No books found in the database.");

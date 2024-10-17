@@ -5,7 +5,9 @@ VisualStudioVersion = 17.10.35201.131
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BooksStock.API", "BookSales.API\BooksStock.API.csproj", "{3C559909-16E7-4B60-974A-CD0F33B26B06}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuthAccount.API", "AuthAccount.API\AuthAccount.API.csproj", "{B34EA8D3-1354-4CED-938A-79D7635BD2E0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthAccount.API", "AuthAccount.API\AuthAccount.API.csproj", "{B34EA8D3-1354-4CED-938A-79D7635BD2E0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ApiUtilities", "ApiUtilities\ApiUtilities.csproj", "{DDB7683A-F3CF-491A-BE0E-4252CBF46DAD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{B34EA8D3-1354-4CED-938A-79D7635BD2E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B34EA8D3-1354-4CED-938A-79D7635BD2E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B34EA8D3-1354-4CED-938A-79D7635BD2E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDB7683A-F3CF-491A-BE0E-4252CBF46DAD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDB7683A-F3CF-491A-BE0E-4252CBF46DAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDB7683A-F3CF-491A-BE0E-4252CBF46DAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDB7683A-F3CF-491A-BE0E-4252CBF46DAD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

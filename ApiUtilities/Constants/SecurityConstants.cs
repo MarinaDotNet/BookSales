@@ -1,4 +1,4 @@
-﻿namespace AuthAccount.API.Constants;
+﻿namespace ApiUtilities.Constants;
 
 /// <summary>
 /// Provides constant values related to security configurations for authentication and token management.

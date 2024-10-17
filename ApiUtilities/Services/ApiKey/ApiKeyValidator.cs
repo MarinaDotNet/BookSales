@@ -1,4 +1,8 @@
-﻿namespace BooksStock.API.Services.ApiKey;
+﻿using ApiUtilities.Constants;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+
+namespace ApiUtilities.Services.ApiKey;
 
 /// <summary>
 /// Provides validation logic for API keys used to secure API endpoints.
@@ -22,7 +26,7 @@ public class ApiKeyValidator(IConfiguration configuration, ILogger<ApiKeyValidat
 
         try
         {
-            string keyConfig = _configuration.GetValue<string>("StockApiKey")!;
+            string keyConfig = _configuration[SecurityConstants.AuthApiKey]!;
 
             // Ensure the config key is valid and return the comparison result
             return !string.IsNullOrWhiteSpace(keyConfig) && apiKey.Equals(keyConfig);

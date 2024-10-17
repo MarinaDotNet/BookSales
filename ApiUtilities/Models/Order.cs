@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace AuthAccount.API.Models;
+namespace ApiUtilities.Models;
 
 /// <summary>
 /// Represents an order made by a user.

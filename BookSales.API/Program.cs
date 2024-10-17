@@ -1,11 +1,11 @@
-using BookSales.API.Services;
 using Asp.Versioning;
-using BooksStock.API.Services.ApiKey;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore.Internal;
 using Amazon.Runtime.Internal.Transform;
-using BooksStock.API.Services;
 using Microsoft.AspNetCore.Builder;
+using ApiUtilities.Services;
+using BooksStock.API.Services;
+using ApiUtilities.Services.ApiKey;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -1,10 +1,10 @@
 using AuthAccount.API.Constants;
-using AuthAccount.API.Models;
 using AuthAccount.API.Services;
 using Microsoft.EntityFrameworkCore;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.UI.Services;
+using ApiUtilities.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 

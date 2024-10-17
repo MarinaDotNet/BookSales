@@ -1,8 +1,8 @@
-﻿using AuthAccount.API.Models;
-using AuthAccount.API.Constants;
+﻿using AuthAccount.API.Constants;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using ApiUtilities.Models;
 
 namespace AuthAccount.API.Services;
 

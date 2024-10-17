@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
 
-namespace AuthAccount.API.Models;
+namespace ApiUtilities.Models;
 
 /// <summary>
 /// Represents an API user that inherits from the IdentityUser class.
