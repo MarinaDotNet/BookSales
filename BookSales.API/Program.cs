@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using ApiUtilities.Services;
 using BooksStock.API.Services;
 using ApiUtilities.Services.ApiKey;
+using ApiUtilities.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +24,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("MyAdministrationPolicy", policy =>
     {
         policy.WithOrigins("https://localhost:7201")
-        .WithHeaders("Api-Version", "StockApiKey")
+        .WithHeaders("Api-Version", SecurityConstants.AuthApiKey)
         .SetIsOriginAllowed(origin => false)
         .AllowAnyMethod()
         .DisallowCredentials()
@@ -33,7 +34,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("MyUserPolicy", policy =>
     {
         policy.WithOrigins("https://localhost:7201")
-        .WithHeaders("Api-Version", "StockApiKey")
+        .WithHeaders("Api-Version", SecurityConstants.AuthApiKey)
         .SetIsOriginAllowed(origin => false)
         .WithMethods("GET")
         .DisallowCredentials()
@@ -61,11 +62,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
-    options.AddSecurityDefinition("StockApiKey", new OpenApiSecurityScheme()
+    options.AddSecurityDefinition(SecurityConstants.AuthApiKey, new OpenApiSecurityScheme()
     {
         In = ParameterLocation.Header,
         Description = "Please enter valid Stock API key.",
-        Name = "StockApiKey",
+        Name = SecurityConstants.AuthApiKey,
         Type = SecuritySchemeType.ApiKey
     });
 
@@ -77,7 +78,7 @@ builder.Services.AddSwaggerGen(options =>
                 Reference = new OpenApiReference
                 {
                     Type = ReferenceType.SecurityScheme,
-                    Id = "StockApiKey"
+                    Id = SecurityConstants.AuthApiKey
                 }
             },
             Array.Empty<string>()
