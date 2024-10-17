@@ -1,6 +1,7 @@
 ﻿using Asp.Versioning;
 using BooksStock.API.Models;
 using BooksStock.API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -32,6 +33,7 @@ namespace BooksStock.API.Controllers;
 [Produces("application/json")]
 [Consumes("application/json")]
 [EnableCors(PolicyName = "MyAdministrationPolicy")]
+[Authorize(Roles = "Admin")]
 public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ??
@@ -679,7 +681,8 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
 [ApiVersion("2")]
 [Produces("application/json")]
 [Consumes("application/json")]
-[EnableCors(PolicyName = "MyUserPolicy")]
+[EnableCors(PolicyName = "MyUsersPolicy")]
+[Authorize]
 public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ??
@@ -1138,7 +1141,7 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
 [ApiVersion("3")]
 [Produces("application/json")]
 [Consumes("application/json")]
-[EnableCors(PolicyName = "MyUserPolicy")]
+[EnableCors(PolicyName = "MyGuestsPolicy")]
 public class StockV3Controller(MongoDBServices service, ILogger<StockV3Controller> logger) : ControllerBase
 {
     private readonly MongoDBServices _service = service ??

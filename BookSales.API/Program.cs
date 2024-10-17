@@ -7,6 +7,9 @@ using ApiUtilities.Services;
 using BooksStock.API.Services;
 using ApiUtilities.Services.ApiKey;
 using ApiUtilities.Constants;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,7 +26,8 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("MyAdministrationPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:7201")
+        policy
+        .WithOrigins(builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidAudienceKey]!)
         .WithHeaders("Api-Version", SecurityConstants.AuthApiKey)
         .SetIsOriginAllowed(origin => false)
         .AllowAnyMethod()
@@ -31,9 +35,10 @@ builder.Services.AddCors(options =>
         .SetPreflightMaxAge(TimeSpan.FromMinutes(30));
     });
 
-    options.AddPolicy("MyUserPolicy", policy =>
+    options.AddPolicy("MyUsersPolicy", policy =>
     {
-        policy.WithOrigins("https://localhost:7201")
+        policy
+        .WithOrigins(builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidAudienceKey]!)
         .WithHeaders("Api-Version", SecurityConstants.AuthApiKey)
         .SetIsOriginAllowed(origin => false)
         .WithMethods("GET")
@@ -41,7 +46,16 @@ builder.Services.AddCors(options =>
         .SetPreflightMaxAge(TimeSpan.FromHours(3));
     });
 
-    options.DefaultPolicyName = "MyUserPolicy";
+    options.AddPolicy("MyGuestsPolicy", policy =>
+    {
+        policy
+        .WithOrigins(builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidAudienceKey]!)
+        .WithHeaders("Api-Version")
+        .SetIsOriginAllowed(origin => false)
+        .WithMethods("GET")
+        .DisallowCredentials();
+    });
+    options.DefaultPolicyName = "MyGuestsPolicy";
 });
 
 builder.Services
@@ -58,6 +72,29 @@ builder.Services
     });
 
 builder.Services.AddControllers();
+
+builder.Services
+    .AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = true;
+        options.TokenValidationParameters = new TokenValidationParameters()
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidIssuer = builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidIssuerKey],
+            ValidAudience = builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenValidAudienceKey],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(
+                builder.Configuration[SecurityConstants.TokenDataKey + ':' + SecurityConstants.TokenAdminSecretKey]!))
+        };
+    });
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -84,6 +121,31 @@ builder.Services.AddSwaggerGen(options =>
             Array.Empty<string>()
         }
     });
+
+    options.AddSecurityDefinition(SecurityConstants.TokenDataKey, new OpenApiSecurityScheme()
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter valid authorization token.",
+        Name= "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = SecurityConstants.TokenDataKey,
+        Scheme = "bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference()
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = SecurityConstants.TokenDataKey
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 var app = builder.Build();
@@ -95,7 +157,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseCors("MyUserPolicy");
+app.UseCors("MyGuestsPolicy");
 
 app.UseHttpsRedirection();
 
