@@ -1,0 +1,149 @@
+[
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "ConfirmEmailAsync",
+    "RelativePath": "account/confirmemail",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "userId",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "DeleteAsync",
+    "RelativePath": "account/delete",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.DeletionModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "LoginAsync",
+    "RelativePath": "account/login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.LoginModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "UpdatePasswordAsync",
+    "RelativePath": "account/password/reset",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.PasswordResetModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "UpdateAccountDataAsync",
+    "RelativePath": "account/update",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.UpdateModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "RegisterAdminAsync",
+    "RelativePath": "admin/new",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.RegistrationModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "RegisterUserAsync",
+    "RelativePath": "new",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "model",
+        "Type": "AuthAccount.API.Models.Account.RegistrationModel",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
