@@ -1,12 +1,11 @@
-﻿
-/// <summary>
+﻿/// <summary>
 /// A data transfer object (DTO) representing a book's information.
 /// </summary>
 /// <remarks>
 /// This DTO is used for passing book data between the API and the client.
 /// It includes various properties such as title, authors, price, and other attributes of the book.
 /// </remarks>
-namespace BookSales.API.Models;
+namespace BooksStock.API.Models;
 
 public record BookDTO
 {
