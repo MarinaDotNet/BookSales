@@ -2,14 +2,19 @@
 using AuthAccount.API.Constants;
 using AuthAccount.API.Models;
 using AuthAccount.API.Models.Account;
-using Microsoft.AspNetCore.Authorization;
+using AuthAccount.API.Services;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Mvc;
 
 using Microsoft.IdentityModel.Tokens;
-
+using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
-
+using System.Net;
+using System.Net.Sockets;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.Claims;
 using System.Text;
 
@@ -28,63 +33,57 @@ namespace AuthAccount.API.Controllers;
 /// <param name="userManager">Handles user identity operations like user creation, deletion, and validation.</param>
 /// <param name="configuration">Provides access to configuration settings (e.g., JWT token settings).</param>
 /// <param name="logger">Logs activity and errors related to account operations.</param>
+/// <param name="emailSender">Performs the email sending operations.</param>
 [ApiController]
 [ApiVersion("1.0")]
-public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguration configuration, ILogger<AccountV1Controller> logger) : ControllerBase
+[Route("account/")]
+public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguration configuration, ILogger<AccountV1Controller> logger, IEmailSender emailSender) : ControllerBase
 {
     private readonly UserManager<ApiUser> _userManager = userManager ??
         throw new ArgumentNullException(nameof(userManager), "UserManager cannot be null.");
     private readonly IConfiguration _configuration = configuration ??
         throw new ArgumentNullException(nameof(configuration), "Configuration cannot be null.");
-    private readonly ILogger<AccountV1Controller> _logger = logger ?? 
+    private readonly ILogger<AccountV1Controller> _logger = logger ??
         throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
+    private readonly IEmailSender _emailSender = emailSender ?? 
+        throw new ArgumentNullException(nameof(emailSender), "EmailSender cannot be null.");
 
     /// <summary>
-    /// Registers a new administrator account asynchronously.
+    /// Registers a new administrator account asynchronously and sends an email confirmation link to the provided email address. 
+    /// If the provided account email address is one of the default API emails <see cref="AuthConstants.AdminEmailKey"/> or 
+    /// <see cref="AuthConstants.UserEmailKey"/>, then the confirmation link returns a message in <see cref="OkObjectResult"/>.
     /// </summary>
     /// <param name="model">The registration model <see cref="RegistrationModel"/> containing the administrator's details.</param>
     /// <returns>An <see cref="ActionResult"/> representing the outcome of the registration process.</returns>
     /// <remarks>
     /// This method validates the input model, checks for existing accounts with the same email 
-    /// or username, creates a new user, and assigns the admin role. 
+    /// or username, creates a new user and assigns the admin role. It sends the email confirmation link to the provided email. 
+    /// If  the provided  email one of API default emails <see cref="AuthConstants.AdminEmailKey"/> or 
+    /// <see cref="AuthConstants.UserEmailKey"/> then the confirmation link returns message in <see cref="OkObjectResult"/>.
     /// In case of failures, it logs the errors and returns appropriate responses.
     /// </remarks>
-    /// <response code="200">Returns a success message upon successful administrator account registration.</response>
-    /// <response code="400">Invalid data provided for administrator account registration. Ensure all required fields 
-    /// are completed correctly.</response>
-    /// <response code="500">An unexpected error occurred while processing the administrator account registration 
-    /// request.</response>
+    /// <response code="200">
+    /// Returns a success message upon successful administrator account registration. It may contain the confirmation link for
+    /// provided account email if it is one of the default API emails <see cref="AuthConstants.AdminEmailKey"/> or 
+    /// <see cref="AuthConstants.UserEmailKey"/>. 
+    /// </response>
+    /// <response code="400">
+    /// Invalid data provided for administrator account registration. Ensure all required fields are completed correctly.
+    /// </response>
+    /// <response code="500">
+    /// An unexpected error occurred while processing the administrator account registration request.
+    /// </response>
     [HttpPost]
-    [Route("register")]
+    [Route("/admin/new")]
     public async Task<IActionResult> RegisterAdminAsync(RegistrationModel model)
     {
         try
         {
-            var validationResult = ValidateAccountInput(model);
-
-            if (validationResult != null)
+            //Checks the registration model required parameters and null checks
+            var validationResult = ValidateRegistrationModelAsync(model);
+            if (validationResult is not null)
             {
                 return validationResult;
-            }
-
-            if (await DoesEmailExistsAsync(model.EmailAddress))
-            {
-                return BadRequest(new
-                {
-                    message = "An account with the provided email address already exists.",
-                    reason = "The email address is already associated with another account.",
-                    help = "Try using a different email address, or if you already have an account, use the forgot password option."
-                });
-            }
-
-            if (await DoesNameExistsAsync(model.UsernameOrEmail))
-            {
-                return BadRequest(new
-                {
-                    message = "An account with the provided username already exists.",
-                    reason = "The chosen username is already taken by another user.",
-                    help = "Please try registering with a different username or consider using your email address."
-                });
             }
 
             ApiUser user = new()
@@ -97,89 +96,76 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 PasswordHash = new PasswordHasher<ApiUser>().HashPassword(new ApiUser(), model.Password),
                 SecurityStamp = Guid.NewGuid().ToString()
             };
-
-           var registrationResult = await _userManager.CreateAsync(user);
-
+            //Creates a new account
+            var registrationResult = await _userManager.CreateAsync(user);
+            
             if (!registrationResult.Succeeded)
             {
-                _logger.LogError("Admin registration failed: {Errors}", string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Admin registration failed."
-                });
+                _logger.LogError("The 'Admin' account registration failed: {Errors}", 
+                    string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
+                return BadRequest("The account registration failed.");
             }
-            var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.AdminRole);
 
+            //Assigning registered user account to the 'Admin' role
+            var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.AdminRole);
             if (!assigningRoleResult.Succeeded)
             {
-                _logger.LogError("Failed to assign admin role to the registered user: {Errors}", string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Failed to assign admin role to the registered user."
-                });
+                _logger.LogError("Failed to assign 'Admin' role to the registered user: {Errors}", 
+                    string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
+                return BadRequest("Failed to assign 'Admin' role to the registered user.");
             }
 
-            _logger.LogInformation("Admin account successfully registered.");
-            return Ok(new
-            {
-                message = "Account registration successful. The account is now active and ready for use.",
-                note = "Please keep your credentials secure, and contact support if you encounter any issues."
-            });
+            _logger.LogInformation("'Admin' account successfully registered.");
+
+            //Sends the confirmation email link to the account 'Email'.
+            //Exception for the default emails: email will not be sent, and the link will be returned to OkObjectResult as a text message.
+            var emailSendResult = await SendConfirmationLinkAsync(user);
+
+            return emailSendResult ??
+                Ok("Account registration successful. Please check your email for confirmation link.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while registering admin.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
     /// <summary>
-    /// Registers a new user account asynchronously.
+    /// Registers a new user account asynchronously and sends an email confirmation link to the provided email address. 
+    /// If the provided account email address is one of the default API emails <see cref="AuthConstants.AdminEmailKey"/> or 
+    /// <see cref="AuthConstants.UserEmailKey"/>, then the confirmation link returns a message in <see cref="OkObjectResult"/>.
     /// </summary>
     /// <param name="model">The registration model containing the user's details.</param>
     /// <returns>An <see cref="ActionResult"/> representing the outcome of the registration process.</returns>
     /// <remarks>
     /// This method validates the input model, checks for existing accounts with the same email 
-    /// or username, creates a new user, and assigns the user role. 
+    /// or username, creates a new user and assigns the user role. It sends the email confirmation link to the provided email. If 
+    /// the provided
+    /// email one of API default emails <see cref="AuthConstants.AdminEmailKey"/> or <see cref="AuthConstants.UserEmailKey"/> then
+    /// the confirmation link returns message in <see cref="OkObjectResult"/>.
     /// In case of failures, it logs the errors and returns appropriate responses.
     /// </remarks>
-    /// <response code="200">Returns a success message upon successful account registration.</response>
-    /// <response code="400">Invalid data provided for user account registration. Ensure all required fields are filled correctly.</response>
-    /// <response code="500">An unexpected error occurred while processing the registration request.</response>
+    /// <response code="200">
+    /// Returns a success message upon successful user account registration. It may contain the confirmation link for
+    /// provided account email if it is one of the default API emails <see cref="AuthConstants.AdminEmailKey"/> or 
+    /// <see cref="AuthConstants.UserEmailKey"/>. </response>
+    /// <response code="400">
+    /// Invalid data provided for user account registration. Ensure all required fields are filled correctly.
+    /// </response>
+    /// <response code="500">
+    /// An unexpected error occurred while processing the registration request.
+    /// </response>
     [HttpPost]
-    [Route("user/register")]
+    [Route("/new")]
     public async Task<ActionResult> RegisterUserAsync(RegistrationModel model)
     {
         try
         {
-            var validationResult = ValidateAccountInput(model);
-
-            if (validationResult != null)
+            //Checks the registration model's required parameters and null checks.
+            var validationResult = ValidateRegistrationModelAsync(model);
+            if (validationResult is not null)
             {
                 return validationResult;
-            }
-
-            if (await DoesEmailExistsAsync(model.EmailAddress))
-            {
-               return BadRequest(new 
-               {
-                    message = "An account with the provided email address already exists.",
-                    reason = "The email address is already associated with another account.",
-                    help = "Try using a different email address, or if you already have an account, use the forgot password option."
-               });
-            }
-
-            if (await DoesNameExistsAsync(model.UsernameOrEmail))
-            {
-                return BadRequest(new
-                {
-                    message = "An account with the provided username already exists.",
-                    reason = "The chosen username is already taken by another user.",
-                    help = "Please try registering with a different username or consider using your email address."
-                });
             }
 
             ApiUser user = new()
@@ -193,41 +179,36 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 SecurityStamp = Guid.NewGuid().ToString()
             };
 
+            //Creates a new account
             var registrationResult = await _userManager.CreateAsync(user);
-
             if (!registrationResult.Succeeded)
             {
-                _logger.LogError("User registration failed: {Errors}", string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
-                return BadRequest(new 
-                { 
-                    message = "User registration failed." 
-                });
+                _logger.LogError("The 'User' account registration failed: {Errors}", 
+                    string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
+                return BadRequest("The account registration failed.");
             }
-            var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.UserRole);
 
+            //Assigning registered user account to the 'User' role
+            var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.UserRole);
             if (!assigningRoleResult.Succeeded)
             {
-                _logger.LogError("Failed to assign user role to the registered user: {Errors}", string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
-                return BadRequest(new 
-                { 
-                    message = "Failed to assign user role to the registered user."
-                });
+                _logger.LogError("Failed to assign' User' role to the registered user: {Errors}", 
+                    string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
+                return BadRequest("Failed to assign 'User' role to the registered user.");
             }
 
-            _logger.LogInformation("User account successfully registered.");
-            return Ok(new 
-            {
-                message = "Account registration successful. The account is now active and ready for use.",
-                note = "Please keep your credentials secure, and contact support if you encounter any issues."
-            });
+            _logger.LogInformation("The account successfully registered.");
+
+            //Sends the confirmation email link to the account 'Email'.
+            //Exception for the default emails: email will not be sent, and the link will be returned to OkObjectResult as a text message.
+            var emailSendResult = await SendConfirmationLinkAsync(user);
+
+            return emailSendResult ??
+                Ok("Account registration successful. Please check your email for confirmation link.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while registering user.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
@@ -236,73 +217,88 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     /// </summary>
     /// <param name="model">The <see cref="LoginModel"/> containing user login credentials.</param>
     /// <returns>
-    /// A task that represents the asynchronous operation, containing an <see cref="ActionResult"/>.
-    /// If the login is successful, it returns a JWT token. 
+    /// A task representing the asynchronous operation, containing an <see cref="ActionResult"/>.
+    /// If the login is successful, a JWT token will be returned. 
     /// If the model validation fails, it returns a BadRequest result.
     /// If the user does not exist, it returns an Unauthorized result.
     /// If an exception occurs, it returns a Problem result.
     /// </returns>
     /// <remarks>
     /// This method validates the incoming request model, checks the user's credentials,
-    /// generates a JWT token with claims, and logs the user's sign-in event.
+    /// generates a JWT token with claims and logs the user's sign-in event.
     /// </remarks>
-    /// <response code="200">Returns the JWT token and its associated information upon successful authentication.</response>
-    /// <response code="401">Invalid credentials. The requested account was not found, or the entered password 
-    /// does not match the account.</response>
-    /// <response code="500">An unexpected error occurred while processing the request.</response>
+    /// <response code="200">
+    /// Returns the JWT token and its associated information upon successful authentication.
+    /// </response>
+    /// <response code="401">
+    /// Invalid credentials. The requested account was not found, or the entered password 
+    /// does not match the account, or failed to generate a sign-in token.
+    /// </response>
+    /// <response code="500">
+    /// An unexpected error occurred while processing the request.
+    /// </response>
     [HttpPost]
     [Route("login")]
     public async Task<ActionResult> LoginAsync(LoginModel model)
     {
         try
         {
+            //Checks the login model's required parameters and null checks.
             var validationResult = ValidateAccountInput(model);
-
-            if (validationResult != null)
+            if (validationResult is not null)
             {
                 return validationResult;
             }
 
+            //Gets user data if provided sign-in credentials are correct for the requested account
             var user = await ValidateUserAsync(model);
-            if(user is null)
+            if (user is null)
             {
-                return Unauthorized(new { 
-                    message = "Invalid credentials. Please verify your username and password, and try again.",
-                    code = "UNAUTHORIZED_ACCESS",
-                    help = "If you forgot your password, please reset it."
-                });
+                return Unauthorized("Invalid credentials. Please verify your username and password, and try again.");
             }
 
-            var userRoles = await _userManager.GetRolesAsync(user);
+            //Checking if the email is confirmed before generating the token for login
+            if (!user.EmailConfirmed)
+            {
+                return Unauthorized("Please confirm the email. Confirmation link should be sended to your email.");
+            }
 
+            //Getting the list of all roles that the user is assigned
+            var userRoles = await _userManager.GetRolesAsync(user!);
+
+            //Creates and initializes the list of Claim class for the requested user account
             List<Claim> authorizationClaims = [
                 new Claim(ClaimTypes.Name, user.UserName!),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 ];
 
-            foreach(var role in userRoles)
+            //Adds to the Claim list a new authorization claim for each role of the user
+            foreach (var role in userRoles)
             {
                 authorizationClaims.Add(new Claim(ClaimTypes.Role, role));
             }
 
+            //Gets the sign-in token for the requested account
             var token = GenerateJwtToken(authorizationClaims);
+            if(token is null)
+            {
+                _logger.LogWarning("Faled to generate sign-in token for requested account: '{UserEmail}'.", user.Email);
+                return Unauthorized("Faled to sign-in user into requested account.");
+            }
 
             _logger.LogInformation("Generating JWT token for user: {UserName}", user.UserName);
             _logger.LogInformation("User successfuly signed in.");
+
             return Ok(new {
                 message = "Login successful. You are now authenticated.",
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo,
+                expiration = token!.ValidTo,
                 user = user.UserName
             });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while login the user.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.", 
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
@@ -326,12 +322,13 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     {
         try
         {
+            //Checks the deletion model required parameters and null check
             var resultValidation = ValidateAccountInput(model);
             if (resultValidation != null)
             {
                 return resultValidation;
             }
-
+            //Checks if the user has confirmed the account deletion
             if (!model.IsConfirmed)
             {
                 _logger.LogInformation("Account deletion process was canceled by the user");
@@ -342,56 +339,50 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                     help = "If you wish to delete your account in the future, please try again."
                 });
             }
-
+            //Checks the user credentials, if the user has the authority to change this account data
             var user = await ValidateUserAsync(model);
 
-            if(user is null)
+            //If the Validation of the user done above is failed
+            if (user is null || !user.EmailConfirmed)
             {
                 _logger.LogWarning("Unauthorized deletion attempt for account with login: {UserAccountLogin}", model.UsernameOrEmail);
-                return Unauthorized(new
-                {
-                    message = "Lack the necessary permissions to delete this account.",
-                    details = "Your current role does not have the required permissions to perform this action.",
-                    help = "Please contact an administrator if you believe this is an error or if you need further assistance."
-                });
+                return Unauthorized("Lack the necessary permissions to delete this account.");
             }
 
-            var result = await _userManager.DeleteAsync(user);
-
+            //Deleting the account
+            var result = await _userManager.DeleteAsync(user!);
             if (!result.Succeeded)
             {
-                _logger.LogError("Failed to delete account: {Errors}", 
+                _logger.LogError("Failed to delete account: {Errors}",
                     string.Join(", ", result.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Failed to delete account.",
-                    details = "There was an issue processing your request to delete the account.",
-                    help = "Please ensure you have provided the correct account information and try again. If the problem persists, contact support for assistance."
-                });
+                return BadRequest("Failed to delete account.");
             }
 
             _logger.LogInformation("Account successfully deleted.");
-            return Ok(new
+
+            //Sending email with account changed information
+            EmailDTO email = new()
             {
-                message = "Account deleted.",
-                details = "Your account has been successfully removed from our system.",
-                help = "If you have any further questions or need assistance, please contact our support team."
-            });
+                Email = user!.Email!,
+                Subject = "Account Deleted",
+                TextMessage = "We are sorry to see you go. Account deleted by the user request.",
+                Body = "<span>We are sorry to see you go. Account deleted by the user request.</span>"
+            };
+            var emailSendResult = SendEmail(email, "Failed to send email is information to the user.");
+
+            return emailSendResult ??
+                Ok("Your account has been successfully removed from our system.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while deleting the account.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
     /// <summary>
     /// Updates the password for a user account.
     /// </summary>
-    /// <param name="model">The password reset model containing the user's current and new passwords.</param>
+    /// <param name="model">The password reset model contains the user's current and new passwords.</param>
     /// <returns>An <see cref="ActionResult"/> indicating the outcome of the password update operation.</returns>
     /// <remarks>
     /// This method validates the incoming <paramref name="model"/> for null values and 
@@ -404,7 +395,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     /// is returned with a generic error message.
     /// </remarks>
     /// <response code="200">The password was changed successfully</response>
-    /// <response code="401">User lacks the necessary permissions to change the account password.</response>
+    /// <response code="401">User lacks the permission to change the account password.</response>
     /// <response code="400">An issue occurred during the processing of the updating account password.</response>
     /// <response code="500">An unexpected error occurred while processing the request.</response>
     [HttpPut]
@@ -413,24 +404,23 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     {
         try
         {
+            //Checks the password reset model required parameters and null check
             var validationResult = ValidateAccountInput(model);
-            if(validationResult != null)
+            if (validationResult is not null)
             {
                 return validationResult;
             }
 
+            //Checks the user credentials, if the user has the authority to change this account data
             var user = await ValidateUserAsync(model);
-            if (user is null)
-            { 
-                return Unauthorized(new
-                {
-                    message = "Lack the necessary permissions to change password for this account.",
-                    details = "Your current role does not have the required permissions to perform this action.",
-                    help = "Please contact an administrator if you believe this is an error or if you need further assistance."
-                });
+            //If the Validation of the user done above is failed
+            if (user is null || !user.EmailConfirmed)
+            {
+                return Unauthorized("Lack the necessary permissions to change password for this account.");
             }
 
-            var result = await _userManager.ChangePasswordAsync(user, model.Password, model.NewUserPassword);
+            //Changes user password after confirming the current password as the model.Password
+            var result = await _userManager.ChangePasswordAsync(user!, model.Password, model.NewUserPassword);
             if (!result.Succeeded)
             {
                 _logger.LogError("Failed to change account password: {Errors}",
@@ -438,101 +428,22 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 return BadRequest("Failed to change account password.");
             }
 
-            return Ok(new
+            //Sending email with account changed information
+            EmailDTO email = new()
             {
-                message = "Password changed successfully.",
-                help = "You can now log in with your new password."
-            });
+                Email = user!.Email!,
+                Subject = "The account password has been changed.",
+                TextMessage = "Your account password has been changed. If you did not change the password, please contact the support team immediately.",
+                Body = "<span>Your account password has been changed. If you did not change the password, please contact the support team immediately.</span>"
+            };
+            var sendEmailResult = SendEmail(email, "Failed to send email is information to the user.");
+
+            return sendEmailResult ??
+                Ok("Password changed successfully. Failed to send email is information to the user.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while deleting the account.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
-        }
-    }
-
-    /// <summary>
-    /// Updates the password for a user account by an admin.
-    /// </summary>
-    /// <param name="model">The model containing the user account identifier and new password information.</param>
-    /// <returns>An <see cref="ActionResult"/> indicating the result of the password update operation.</returns>
-    /// <remarks>
-    /// Returns BadRequest if the model is invalid or the user is not found.
-    /// Returns Ok if the password update is successful.
-    /// </remarks>
-    /// <response code="200">The password was changed successfully</response>
-    /// <response code="401">User lacks the necessary permissions to change the account password.</response>
-    /// <response code="400">An issue occurred during the processing of the updating account password.</response>
-    /// <response code="500">An unexpected error occurred while processing the request.</response>
-    [HttpPut]
-    [Route("admin/update/password")]
-    public async Task<ActionResult> UpdateUserPasswordAsync(AdminPasswordResetModel model)
-    {
-        try
-        {
-            var validationResult = ValidateAccountInput(model);
-            if (validationResult != null)
-            {
-                return validationResult;
-            }
-
-            var admin = ValidateUserAsync(model).Result;
-            if (admin is null || 
-                !await _userManager.IsInRoleAsync(admin, AuthConstants.AdminRole))
-            {
-                return Unauthorized(new
-                {
-                    message = "Access denied.",
-                    details = "You must be an authorized administrator to perform this action.",
-                    help = "Please contact your system administrator if you believe you have received this message in error."
-                });
-            }
-
-            var currentAccount = model.IsValidEmail(model.UserIdentifier) ?
-                await _userManager.FindByEmailAsync(model.UserIdentifier) :
-                await _userManager.FindByNameAsync(model.UserIdentifier);
-            if (currentAccount is null)
-            {
-                return NotFound(new
-                {
-                    message = "Customer account not found.",
-                    details = "No account exists with the provided identifier. Please check the email or username and try again.",
-                    help = "If you believe this account should exist, please contact support for further assistance."
-                });
-            }
-
-            var resetToken = await _userManager.GeneratePasswordResetTokenAsync(currentAccount);
-
-            var result = await _userManager.ResetPasswordAsync(currentAccount, resetToken, model.NewUserPassword);
-
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Failed to change account password: {Errors}",
-                    string.Join(", ", result.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Failed to update password for user account.",
-                    details = "There was an issue processing your request to update the password for the account. Please check the provided information and ensure it meets the required criteria.",
-                    help = "If the issue persists, please contact support for assistance."
-                });
-            }
-            return Ok(new
-            {
-                message = "Account password updated successfully.",
-                details = "User account password has been successfully updated.",
-                help = "User can continue to use account as usual."
-            });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "An error occured while updating data of the account.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
@@ -561,164 +472,113 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     {
         try
         {
+            //Checks the password reset model required parameters and null check
             var validationResult = ValidateAccountInput(model);
-            if(validationResult != null) 
-            {
-                return validationResult; 
-            }
-
-            var userCurrent = await ValidateUserAsync(model);
-
-            if(userCurrent is null)
-            {
-                return Unauthorized(new
-                {
-                    message = "Lack the necessary permissions to update this account.",
-                    details = "Your current role does not have the required permissions to perform this action.",
-                    help = "Please contact an administrator if you believe this is an error or if you need further assistance."
-                });
-            }
-
-            ApiUser updatedUser = userCurrent;
-                
-            if(!string.IsNullOrWhiteSpace(model.UpdatedLogin) &&
-                !userCurrent.UserName!.Equals(model.UpdatedLogin))
-            {
-                updatedUser.UserName = model.UpdatedLogin;
-                updatedUser.NormalizedUserName = model.UpdatedLogin.ToUpperInvariant();
-            }
-            if(!string.IsNullOrWhiteSpace(model.UpdatedEmailAddress) &&
-                !userCurrent.Email!.Equals(model.UpdatedEmailAddress))
-            {
-                updatedUser.Email = model.UpdatedEmailAddress; 
-                updatedUser.NormalizedEmail = model.UpdatedEmailAddress.ToUpperInvariant();
-            }
-
-            var result = await _userManager.UpdateAsync(updatedUser);
-
-            if (!result.Succeeded)
-            {
-                _logger.LogError("Failed to change account password: {Errors}",
-                    string.Join(", ", result.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Failed to update account.",
-                    details = "There was an issue processing your request to update the account.",
-                    help = "Please ensure you have provided the correct account information and try again. If the problem persists, contact support for assistance."
-                });
-            }
-
-            return Ok(new
-            {
-                message = "Account updated successfully."
-            });
-        }
-        catch(Exception ex)
-        {
-            _logger.LogError(ex, "An error occured while updating data of the account.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
-        }
-    }
-
-    /// <summary>
-    /// Updates the user account information for an admin user.
-    /// </summary>
-    /// <param name="model">The model containing updated user account data.</param>
-    /// <returns>An <see cref="ActionResult"/> indicating the result of the operation.</returns>
-    /// <remarks>
-    /// Returns BadRequest if the model is invalid or the user is not found.
-    /// Returns Ok if the update is successful.
-    /// </remarks>
-    /// <response code="200">The account data was updated successfully</response>
-    /// <response code="401">User lacks the necessary permissions to update the account data.</response>
-    /// <response code="400">An issue occurred during the processing of the updating account data.</response>
-    /// <response code="500">An unexpected error occurred while processing the request.</response>
-    [HttpPut]
-    [Route("admin/update")]
-    public async Task<ActionResult> UpdateUserAccountAsync(AdminUpdateModel model)
-    {
-        try
-        {
-            var validationResult = ValidateAccountInput(model);
-            if(validationResult != null)
+            if (validationResult != null)
             {
                 return validationResult;
             }
 
-            var admin = await ValidateUserAsync(model);
-            if(admin is null ||
-                !await _userManager.IsInRoleAsync(admin, AuthConstants.AdminRole))
+            //Checks the user credentials, if the user has the authority to change this account data
+            var user = await ValidateUserAsync(model);
+            //If the Validation of the user done above is failed
+            if (user is null || !user.EmailConfirmed)
             {
-                return Unauthorized(new
-                {
-                    message = "Access denied.",
-                    details = "You must be an authorized administrator to perform this action.",
-                    help = "Please contact your system administrator if you believe you have received this message in error."
-                });
+                return Unauthorized("Lack the necessary permissions to update this account.");
             }
 
-            var userCurrent = model.IsValidEmail(model.UserIdentifier) ?
-                await _userManager.FindByEmailAsync(model.UserIdentifier) :
-                await _userManager.FindByNameAsync(model.UserIdentifier);
+            string beforeUpdateEmail = user.Email!;
 
-            if (userCurrent is null)
-            {
-                return NotFound(new
-                {
-                    message = "Customer account not found.",
-                    details = "No account exists with the provided identifier. Please check the email or username and try again.",
-                    help = "If you believe this account should exist, please contact support for further assistance."
-                });
-            }
-
-            ApiUser updatedUser = userCurrent;
-
+            //Check if the updated login value is provided and is different from the current username.
             if (!string.IsNullOrWhiteSpace(model.UpdatedLogin) &&
-                !userCurrent.UserName!.Equals(model.UpdatedLogin))
+                !user.UserName!.Equals(model.UpdatedLogin))
             {
-                updatedUser.UserName = model.UpdatedLogin;
-                updatedUser.NormalizedUserName = model.UpdatedLogin.ToUpperInvariant();
+                //Update the username and normalize it.
+                user.UserName = model.UpdatedLogin;
+                user.NormalizedUserName = model.UpdatedLogin.ToUpperInvariant();
             }
+            //Check if the updated email address is and confirm that the updated email is provided,
+            //and they are different from the current email address, but they are same as each other
             if (!string.IsNullOrWhiteSpace(model.UpdatedEmailAddress) &&
-                !userCurrent.Email!.Equals(model.UpdatedEmailAddress))
+                !string.IsNullOrWhiteSpace(model.ConfirmUpdatedEmailAddress) &&
+                !user.Email!.Equals(model.UpdatedEmailAddress) &&
+                model.UpdatedEmailAddress.Equals(model.ConfirmUpdatedEmailAddress))
             {
-                updatedUser.Email = model.UpdatedEmailAddress;
-                updatedUser.NormalizedEmail = model.UpdatedEmailAddress.ToUpperInvariant();
+                //Update the email and normalize it
+                user.Email = model.UpdatedEmailAddress;
+                user.NormalizedEmail = model.UpdatedEmailAddress.ToUpperInvariant();
+                //Mark the email as unconfirmed since it's been changed.
+                user.EmailConfirmed = false;
             }
 
-            var result = await _userManager.UpdateAsync(updatedUser);
-
+            //Update the account
+            var result = await _userManager.UpdateAsync(user);
             if (!result.Succeeded)
             {
-                _logger.LogError("Failed to update account data: {Errors}",
+                _logger.LogError("Failed to change account password: {Errors}",
                     string.Join(", ", result.Errors.Select(error => error.Description)));
-                return BadRequest(new
-                {
-                    message = "Failed to update account data.",
-                    details = "There was an issue processing your request to update the account. Please check the provided information and ensure it meets the required criteria.",
-                    help = "If the issue persists, please contact support for assistance."
-                });
+                return BadRequest("Failed to update account.");
             }
-            return Ok(new
+
+            //The information message to be sent about updating the user account
+            string infoMessage = user.Email!.Equals(user.Email) ?
+                "Some of your account data has been changed. Please contact the support team immediately if you did not request it." :
+                "Your account email address has been changed. This email was removed from your account. If you did not request it, please contact the support team immediately.";
+
+            EmailDTO email = new()
             {
-                message = "Account updated successfully.",
-                details = "User account information has been successfully updated.",
-                help = "User can continue to use account as usual."
-            });
+                //Ensure that the email is sent to the previous email in case it was changed and the user did not request this action
+                Email = beforeUpdateEmail,
+                TextMessage = infoMessage,
+                Body = "<span>" + infoMessage + "</span>",
+                Subject = "Updated account data"
+            };
+
+            var infoEmailSendResult = SendEmail(email, "Failed to send email is information to the user.");
+
+            //Check if the account's email address has been changed. If so, a confirmation email link must be sent to the new email address.
+            if (!user.EmailConfirmed)
+            {
+                //Sends the confirmation link to the provided by user email, exception for the default emails
+                var linkConfirmSendResult = await SendConfirmationLinkAsync(user);
+                return linkConfirmSendResult ??
+                    Ok("Account updated successfully. Please check your new email for confirmation link. If you did not updated your account please contact the support team.");
+            }
+
+            return infoEmailSendResult ??
+                Ok("Account updated successfully.");
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An error occured while updating data of the account.");
-            return Problem(
-                detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
-                "support if the issue persists.",
-                statusCode: 500);
+            return Exception(ex);
         }
     }
 
+    [ApiVersionNeutral]
+    [HttpGet]
+    [Route("/account/confirmemail")]
+    public async Task<ActionResult> ConfirmEmailAsync(string userId, string token)
+    {
+        try
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("Account was not found.");
+            }
+
+            var isValid = await _userManager.ConfirmEmailAsync(user, token);
+
+            return isValid.Succeeded ?
+                Ok("The account successfully confirmed.") :
+                BadRequest("Request failed. Please contact the support team.");
+        }
+        catch(Exception ex)
+        {
+            return Exception(ex);
+        }
+    }
 
     #region Helper Methods
 
@@ -776,10 +636,10 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
         ApiUser? user = model.IsValidEmail(model.UsernameOrEmail) ?
             await _userManager.FindByEmailAsync(model.UsernameOrEmail) :
             await _userManager.FindByNameAsync(model.UsernameOrEmail);
-        
-        return user is null || 
+
+        return user is null ||
             !await _userManager.CheckPasswordAsync(user, model.Password) ?
-            null : 
+            null :
             user;
     }
 
@@ -837,6 +697,200 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             });
         }
         return null;
+    }
+
+    /// <summary>
+    /// Sends an email confirmation link to the specified user.
+    /// </summary>
+    /// <param name="user">
+    /// The <see cref="ApiUser"/> for whom the confirmation email is to be sent. The user must have a valid email address.
+    /// </param>
+    /// <returns>
+    /// Returns an <see cref="ObjectResult"/> indicating the result of the operation:
+    /// - Returns <see cref="BadRequest"/> if the user or email is null, or if the email format is invalid.
+    /// - Returns <see cref="Ok"/> if the email with the confirmation link was successfully sent.
+    /// - Returns <see cref="Problem"/> if an error occurs during the email sending process.
+    /// </returns>
+    private async Task<ObjectResult> SendConfirmationLinkAsync(ApiUser user)
+    {
+        //Null checks
+        if(user is null || string.IsNullOrWhiteSpace(user.Email))
+        {
+            _logger.LogError("Failed to send 'Email' with email confirmation link, the 'ApiUser' object or 'ApiUser.Email' parameter is empty or null.");
+            return new ObjectResult(BadRequest("The account data and 'Email' is required, the 'Email' and account data cannot be null or empty."));
+        }
+        //Email format check
+        if (!new RegistrationModel().IsValidEmail(user.Email))
+        {
+            _logger.LogWarning("Failed to send 'Email' with email confirmation link, provided 'Email' is not in valid format: {EmailAddress}.", user.Email);
+            return new ObjectResult(BadRequest("The provided 'Email' not in valid format. Please check the 'Email'."));
+        }
+
+        //Generates a confirmation link
+        string confirmLink = await GenerateConfirmationEmailLink(HttpContext, user);
+        
+        if(string.IsNullOrWhiteSpace(confirmLink))
+        {
+            _logger.LogError("Failed to generate the email confirmation link for the provided 'Email': {EmailAddress}.", user.Email);
+            return new ObjectResult(BadRequest("Failed to generate the email confirmation link. " +
+                "Please try again later or contact the support team."));
+        }
+
+        //Prepare the email content with the confirmation link
+        EmailDTO email = new()
+        {
+            Email = user.Email!,
+            Subject = "Confirmation email",
+            Body = $"<h1>Welcome, {user.UserName}!<h1/>" +
+                $"Please, confirm your email address by <a href='{confirmLink}'>clicking this link </a><br>" +
+                $", or copy and paste into the browser the link  below:<br>" +
+                $"{confirmLink}",
+            TextMessage = $"Welcome, {user.UserName}! Please confirm your email address by copying and pasting into the browser the link  below: {confirmLink}"
+        };
+
+        //Sends the confirmation link to the provided by user email. Exception for the default emails: the email will not be sent.
+        var emailSendResult = SendEmail(email, "An unexpected error occurred while sending email confirmation link. Please try to resend confirmation link later or contact support if the issue persists.");
+
+        return emailSendResult ??
+            new ObjectResult(Ok("Email with confirmation link sended successfully."));
+    }
+
+    /// <summary>
+    /// Generates an email confirmation link for the specified user.
+    /// </summary>
+    /// <param name="httpContext">The current <see cref="HttpContext"/> to retrieve the request scheme and host for constructing the URL.</param>
+    /// <param name="user">The <see cref="ApiUser"/> for whom the confirmation link is to be generated. The user must have a valid email address.</param>
+    /// <returns>
+    /// Returns the generated email confirmation link as a string. If the user or email is null, an empty string is returned.
+    /// </returns>
+    private async Task<string> GenerateConfirmationEmailLink(HttpContext httpContext, ApiUser user)
+    {
+        if (user is null || string.IsNullOrWhiteSpace(user.Email))
+        {
+            _logger.LogError("Failed to generate the confirmation link for email, the 'ApiUser' object or 'ApiUser.Email' parameter is empty or null.");
+            return string.Empty;
+        }
+
+        var token = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+
+        //Encodes the generated token for safe URL transmission
+        string encodedToken = WebUtility.UrlEncode(token);
+
+        //Constructs and returns the confirmation link URL
+        return $"{httpContext.Request.Scheme}://{httpContext.Request.Host}/account/confirmemail?userId={user.Id}&token={encodedToken}";
+    }
+
+    /// <summary>
+    /// Validates the <see cref="RegistrationModel"/> provided by the user.
+    /// Checks if the account input is valid, whether the email or username already exists.
+    /// </summary>
+    /// <param name="model">The <see cref="RegistrationModel"/> containing user registration details such as email and username.</param>
+    /// <returns>
+    /// Returns a <see cref="BadRequestObjectResult"/> if any validation fails, such as:
+    /// - Invalid account input
+    /// - Email address already exists
+    /// - Username is already taken
+    /// Returns null if all validations pass.
+    /// </returns>
+    private BadRequestObjectResult? ValidateRegistrationModelAsync(RegistrationModel model)
+    {
+        var validationResult = ValidateAccountInput(model);
+
+        if (validationResult != null)
+        {
+            return validationResult;
+        }
+
+        //Checks if email address already in the system
+        if (DoesEmailExistsAsync(model.EmailAddress).Result)
+        {
+            return BadRequest(new
+            {
+                message = "An account with the provided email address already exists.",
+                reason = "The email address is already associated with another account.",
+                help = "Try using a different email address, or if you already have an account, use the forgot password option."
+            });
+        }
+
+        //Checks if user name already in the system
+        if (DoesNameExistsAsync(model.UsernameOrEmail).Result)
+        {
+            return BadRequest(new
+            {
+                message = "An account with the provided username already exists.",
+                reason = "The chosen username is already taken by another user.",
+                help = "Please try registering with a different username or consider using your email address."
+            });
+        }
+
+        //Return null if no validation issues are found
+        return null;
+    }
+
+    /// <summary>
+    /// Sends an email to the specified recipient using the provided <see cref="EmailDTO"/> object.
+    /// Handles exceptions and prevents sending emails to default API accounts (admin and user).
+    /// </summary>
+    /// <param name="email">The <see cref="EmailDTO"/> object containing the email details such as recipient, subject, and body.</param>
+    /// <param name="errorMessage">A custom error message to display in case of a failure to send the email.</param>
+    /// <returns>
+    /// If the email is successfully sent, returns <c>null</c>.
+    /// If the email fails to send, returns an <see cref="ObjectResult"/> containing the error message.
+    /// If the email belongs to a default API account (admin or user), returns an <see cref="OkObjectResult"/> with the email details in the response.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">Thrown if the <paramref name="email"/> parameter is null.</exception>
+    private ObjectResult? SendEmail(EmailDTO email, string errorMessage) 
+    {
+        try
+        {
+            if(string.IsNullOrWhiteSpace(email.Email))
+            {
+                throw new ArgumentNullException(nameof(email), "The email address cannot be null or empty.");
+            }
+
+            //Prevent sending emails to default API accounts (admin or user) and return the email details in the response
+            if (email.Email.Equals(_configuration[AuthConstants.AdminEmailKey]) ||
+                email.Email.Equals(_configuration[AuthConstants.UserEmailKey]))
+            {
+                _logger.LogWarning("Unable to send email to the default API account: {EmailAddress}.", email.Email);
+                return Ok(new
+                {
+                    message = "Unable to send email to the default API accounts",
+                    body = email.TextMessage ?? email.Body,
+                    subject = email.Subject
+                });
+            }
+
+            var emailSendResult = _emailSender.SendEmailAsync(email.Email, email.Subject, email.Body);
+
+            //If there is no exception in the result, return null indicating success
+            return emailSendResult.Exception is null ?
+                null :
+                throw emailSendResult.Exception;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError("Message: {ErrorMessage}. Error: {Exception}.", errorMessage, ex);
+            return Problem(detail: errorMessage, statusCode: 500);
+        }
+    }
+
+    /// <summary>
+    /// Handles exceptions by logging the error and returning a standardized problem response.
+    /// This method is used to capture and respond to unexpected errors in the user registration process.
+    /// </summary>
+    /// <param name="ex">The <see cref="Exception"/> object representing the error that occurred.</param>
+    /// <returns>
+    /// An <see cref="ObjectResult"/> containing the error details and a status code of 500.
+    /// The response includes a user-friendly error message instructing the user to try again later or contact support.
+    /// </returns>
+    private ObjectResult Exception(Exception ex)
+    {
+        _logger.LogError(ex, "An error occured while registering user.");
+        return Problem(
+            detail: "An unexpected error occurred while processing your request. Please try again later or contact " +
+            "support if the issue persists.",
+            statusCode: 500);
     }
     #endregion Helper Methods
 }
