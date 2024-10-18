@@ -1,4 +1,5 @@
-﻿using Asp.Versioning;
+﻿using ApiUtilities.Models;
+using Asp.Versioning;
 using BooksStock.API.Models;
 using BooksStock.API.Services;
 using Microsoft.AspNetCore.Authorization;

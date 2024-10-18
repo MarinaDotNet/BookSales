@@ -20,7 +20,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "BooksStock.API.Models.Book",
+        "Type": "ApiUtilities.Models.Book",
         "MediaTypes": [
           "application/json"
         ],
@@ -49,7 +49,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -73,7 +73,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -97,7 +97,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -213,7 +213,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -252,7 +252,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -296,7 +296,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -335,7 +335,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -374,7 +374,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -408,7 +408,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "System.Collections.Generic.IEnumerable\u00601[[BooksStock.API.Models.Book, BooksStock.API, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[ApiUtilities.Models.Book, ApiUtilities, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
         "MediaTypes": [
           "application/json"
         ],
@@ -437,7 +437,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "BooksStock.API.Models.Book",
+        "Type": "ApiUtilities.Models.Book",
         "MediaTypes": [
           "application/json"
         ],
@@ -466,7 +466,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "BooksStock.API.Models.Book",
+        "Type": "ApiUtilities.Models.Book",
         "MediaTypes": [
           "application/json"
         ],
@@ -650,7 +650,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "BooksStock.API.Models.Book",
+        "Type": "ApiUtilities.Models.Book",
         "MediaTypes": [
           "application/json"
         ],
@@ -684,7 +684,7 @@
     ],
     "ReturnTypes": [
       {
-        "Type": "BooksStock.API.Models.Book",
+        "Type": "ApiUtilities.Models.Book",
         "MediaTypes": [
           "application/json"
         ],
