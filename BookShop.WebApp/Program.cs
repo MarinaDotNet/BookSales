@@ -1,4 +1,9 @@
+using BookShop.WebApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddUserSecrets<StartupBase>();
+ApiEndpoints.BaseBookApiUrl = builder.Configuration["ApiEndpointsSettings:BaseBookApiUrl"]!;
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
