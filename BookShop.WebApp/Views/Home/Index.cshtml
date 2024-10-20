@@ -1,7 +1,76 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using ApiUtilities.Models
+@{
+    ViewData["Title"] = "Welcome";
 }
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+@model ViewModel
+<body id="homepage">
+    <form>
+        <div class="text-center container-fluid">
+            <h1 class="display-4">You are welcome to our Books Shelfs.</h1>
+        </div>
+        <div class="row">
+            @if(Model.Product is not null && Model.Product.Books.Any())
+            {
+                @foreach(Book book in Model.Product.Books)
+                {
+                    <div class="col-sm-4">
+                        <div class="card text-white bg-secondary border-primary mb-3">
+                            <h3 class="card-header" title="Book Title" style="min-height: 7rem">@book.Title</h3>
+                            <img loading="lazy" class="card-img-top align-self-center" src="images/image2.webp" alt="Image of the book" />
+                            <div class="card-body">
+                                <h4 class="card-title" title="Book Authors">By 
+                                    @if(book.Authors.Count == 1)
+                                    {
+                                        @book.Authors[0]
+                                    }
+                                    else
+                                    {
+                                        @foreach(string author in book.Authors)
+                                        {
+                                            @if(book.Authors.IndexOf(author) == book.Authors.Count - 1 ||
+                                            book.Authors.IndexOf(author) == 0)
+                                            {
+                                                @author
+                                            }
+                                            else
+                                            {
+                                                    <span>, @author</span>
+                                            } 
+                                        }
+                                    }                               
+                                </h4>
+                                    <span class="card-title card-price" title="Best Price">
+                                        <h2>$@book.Price</h2>
+                                    </span>
+                                <div class="card-buttons">
+                                    <a class="btn btn-primary my-btn" title="Explore more about: &#10; `@book.Title`" href=@Url.ActionLink("Details", "Home", new {@book.Id})>Details</a>
+                                    <a class="btn btn-primary my-btn" title="Add &#10; `@book.Title` into order" href=@Url.ActionLink("Add", "Home", new {@book.Id})>Add to Order</a>
+                                 </div>
+                            </div>
+                            <div class="card-footer text-light" title="Book Genres" style="min-height: 7rem;">
+                                @foreach(string genre in book.Genres)
+                                {
+                                    <a class="card-link text-light text-wrap" href="#">@genre</a>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            <div class="col-sm-4">
+                <div class="card text-white bg-secondary border-primary mb-3">
+                    <h5 class="card-header" title="Discover more Books for any taste" style="min-height: 7rem;">Discover more Books for any taste</h5>
+                    <img loading="lazy" class="card-img-top align-self-center" src="images/image2.webp" alt="image of book" />
+                    <div class="card-body">
+                        <h5 class="card-title" title="Discover more Authors">Discover more talanted Authors</h5>
+                        <h4 class="card-title" title="Grab yours at a great price">Available at an unbeatable price</h4>
+                        <a class="btn btn-primary my-btn" title="Observe out rich library" href=@Url.ActionLink("Shop", "Home")>Observe More</a>
+                    </div>
+                    <div class="card-footer text-light" title="Hughe range of Genres" style="min-height: 7rem;">
+                        <a class="card-link text-light text-wrap" href=@Url.ActionLink("Shop", "Home")>Discover our Genres range</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
