@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "Vmb2VLD0Gfk3yFOABfl1NLplAIg0QQx08J0cYjUp+9g=",
+  "Hash": "DZaKPST50f7RJiSVbvwSiGIZ0cYY5GGI2t5a0sPHu3k=",
   "Source": "BookShop.WebApp",
   "BasePath": "_content/BookShop.WebApp",
   "Mode": "Default",
@@ -91,6 +91,25 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\favicon.ico"
+    },
+    {
+      "Identity": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookShop.WebApp\\wwwroot\\images\\image2.webp",
+      "SourceId": "BookShop.WebApp",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookShop.WebApp\\wwwroot\\",
+      "BasePath": "_content/BookShop.WebApp",
+      "RelativePath": "images/image2.webp",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\images\\image2.webp"
     },
     {
       "Identity": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookShop.WebApp\\wwwroot\\js\\site.js",

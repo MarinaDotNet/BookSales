@@ -11,10 +11,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("2613c28a-ce75-47e0-9816-cc18494145b2")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("BookShop.WebApp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+263d7daec2974bdc4ea54e403759199f9d32ecdf")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+af493922f5f6e70ea53c6a15bffc92a13b6af6fb")]
 [assembly: System.Reflection.AssemblyProductAttribute("BookShop.WebApp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("BookShop.WebApp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

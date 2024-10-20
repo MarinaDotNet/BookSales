@@ -13,6 +13,10 @@
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
+      "Id": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookShop.WebApp\\wwwroot\\images\\image2.webp",
+      "PackagePath": "staticwebassets\\images\\image2.webp"
+    },
+    {
       "Id": "C:\\Users\\msich\\Documents\\ProgrammingPractice\\CSharp\\BookSales.API\\BookShop.WebApp\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
