@@ -1,4 +1,4 @@
-﻿namespace AuthAccount.API.Constants;
+﻿namespace ApiUtilities.Constants;
 
 /// <summary>
 /// Provides constant values related to database connection settings.

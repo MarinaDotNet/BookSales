@@ -1,10 +1,11 @@
-﻿using AuthAccount.API.Constants;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using ApiUtilities.Models;
+using ApiUtilities.Constants;
+using Microsoft.Extensions.Configuration;
 
-namespace AuthAccount.API.Services;
+namespace ApiUtilities.Services;
 
 /// <summary>
 /// Represents the application's database context for managing authentication, users, roles, and orders.
@@ -33,14 +34,14 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration
         string adminEmail = _configuration[AuthConstants.AdminEmailKey]! ??
             throw new InvalidOperationException("The section in Configuration 'AdminEmail' should not be null or empty.");
         string userEmail = _configuration[AuthConstants.UserEmailKey]! ??
-            throw new InvalidOperationException("The section in Configuration 'UserEmail' should not be null or empty."); ; 
+            throw new InvalidOperationException("The section in Configuration 'UserEmail' should not be null or empty."); ;
         string password = _configuration[AuthConstants.PasswordKey]! ??
             throw new InvalidOperationException("The section in Configuration 'AccountsPassword' should not be null or empty."); ;
 
         // Generate unique IDs for user and role entities.
         string userId = Guid.NewGuid().ToString();
         string adminId = Guid.NewGuid().ToString();
-        string userRoleId = Guid.NewGuid().ToString();  
+        string userRoleId = Guid.NewGuid().ToString();
         string adminRoleId = Guid.NewGuid().ToString();
 
         var hasher = new PasswordHasher<ApiUser>();
@@ -75,7 +76,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, IConfiguration
         builder.Entity<IdentityRole>().HasData(
             new IdentityRole
             {
-                Id= adminRoleId,
+                Id = adminRoleId,
                 Name = AuthConstants.Role.Admin.ToString(),
                 NormalizedName = AuthConstants.Role.Admin.ToString().ToUpperInvariant(),
                 ConcurrencyStamp = Guid.NewGuid().ToString()

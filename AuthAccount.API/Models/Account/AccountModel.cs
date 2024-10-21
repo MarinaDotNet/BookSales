@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel;
-using AuthAccount.API.Constants;
 using System.Text.RegularExpressions;
+using ApiUtilities.Constants;
 
 namespace AuthAccount.API.Models;
 

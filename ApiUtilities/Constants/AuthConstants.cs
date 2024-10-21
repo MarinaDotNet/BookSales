@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion.Internal;
 
-namespace AuthAccount.API.Constants;
+namespace ApiUtilities.Constants;
 
 /// <summary>
 /// Provides constant values related to authentication, including user roles and configuration keys.

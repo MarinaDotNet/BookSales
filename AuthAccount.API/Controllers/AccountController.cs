@@ -1,7 +1,6 @@
 ﻿using ApiUtilities.Constants;
 using ApiUtilities.Models;
 using Asp.Versioning;
-using AuthAccount.API.Constants;
 using AuthAccount.API.Models;
 using AuthAccount.API.Models.Account;
 using AuthAccount.API.Services;
