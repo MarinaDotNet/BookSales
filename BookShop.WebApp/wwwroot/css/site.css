@@ -39,6 +39,11 @@ h6 {
     background-color: #3D2C29 !important; 
 }
 
+.navbar-nav#accountBar {
+    display: flex;
+    justify-content: right;
+}
+
 .col-sm-4 {
     display: flex;
 }
@@ -79,27 +84,27 @@ div.card:hover {
 
 /*#region buttons*/
 
-button, 
+button,
 a.btn-primary.my-btn {
-    background-color: #D3BD9D;
-    color: #312421;
-    border: 1px solid #BCA37F;
+    background-color: #D3BD9D !important;
+    color: #312421 !important;
+    border: 1px solid #BCA37F !important;
 }
 
-button:hover, 
+button:hover,
 a.btn-primary.my-btn:hover {
-    border: 1px solid #350A08; 
-    background-color: #493531; 
-    color: #F7BB2E;
-    text-shadow: 1px 1px 2px #350A08, 0 0 1rem #000, 0 0 0.2rem #000;
+    border: 1px solid #350A08 !important;
+    background-color: #493531 !important;
+    color: #F7BB2E !important;
+    text-shadow: 1px 1px 2px #350A08, 0 0 1rem #000, 0 0 0.2rem #000 !important;
 }
 
-.btn:focus, 
-.btn:active:focus, 
-.btn-link.nav-link:focus, 
-.form-control:focus, 
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
 .form-check-input:focus {
-    box-shadow: 0 0 0 0.1rem #350A08, 0 0 1rem white;
+    box-shadow: 0 0 0 0.1rem #350A08, 0 0 1rem white !important;
 }
 
 /*#endregion buttons*/
