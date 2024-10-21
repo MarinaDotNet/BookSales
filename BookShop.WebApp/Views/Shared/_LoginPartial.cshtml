@@ -1,0 +1,35 @@
+﻿@using Microsoft.Extensions.Caching.Memory
+
+
+@inject IMemoryCache _userCache
+
+<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+<link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+<link rel="stylesheet" href="~/BookShop.WebApp.styles.css" asp-append-version="true" />
+
+<ul id="accountBar" class="navbar-nav flex-grow-1">
+    @if(_userCache.TryGetValue("usertoken", out(string token, string expiry, string userName) userCache) &&
+    !string.IsNullOrWhiteSpace(userCache.token) &&
+    !string.IsNullOrWhiteSpace(userCache.userName) &&
+    DateTime.TryParse(userCache.expiry, out DateTime dateTime) &&
+    DateTime.UtcNow <= dateTime.ToUniversalTime())
+    {
+        <li class="nav-item">
+            <a id="manage" class="nav-link text-light" asp-controller="Account" asp-action="ManageIndex" title="Account Manage">Hello @userCache.userName!</a>
+        </li>
+        <li class="nav-item">
+            <form id="logOutForm" class="form-inline" asp-controller="Account" asp-action="Logout">
+                <button id="logout" type="submit" class="nav-link btn btn-link text-dark border-0">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-light" id="register" asp-controller="Account" asp-action="RegisterPage">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-light" id="login" asp-controller="Account" asp-action="LoginPage">Login</a>
+        </li>
+    }
+</ul>
