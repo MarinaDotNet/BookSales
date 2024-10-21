@@ -7,6 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddUserSecrets<StartupBase>();
 ApiEndpoints.BaseBookApiUrl = builder.Configuration["ApiEndpointsSettings:BaseBookApiUrl"]!;
+ApiEndpoints.BaseAccountApiUrl = builder.Configuration["ApiEndpointsSettings:BaseAccountApiUrl"]!;
 
 builder.Services.AddMemoryCache();
 
