@@ -46,7 +46,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
         throw new ArgumentNullException(nameof(configuration), "Configuration cannot be null.");
     private readonly ILogger<AccountV1Controller> _logger = logger ??
         throw new ArgumentNullException(nameof(logger), "Logger cannot be null.");
-    private readonly IEmailSender _emailSender = emailSender ?? 
+    private readonly IEmailSender _emailSender = emailSender ??
         throw new ArgumentNullException(nameof(emailSender), "EmailSender cannot be null.");
 
     /// <summary>
@@ -99,10 +99,10 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             };
             //Creates a new account
             var registrationResult = await _userManager.CreateAsync(user);
-            
+
             if (!registrationResult.Succeeded)
             {
-                _logger.LogError("The 'Admin' account registration failed: {Errors}", 
+                _logger.LogError("The 'Admin' account registration failed: {Errors}",
                     string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
                 return BadRequest("The account registration failed.");
             }
@@ -111,7 +111,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.AdminRole);
             if (!assigningRoleResult.Succeeded)
             {
-                _logger.LogError("Failed to assign 'Admin' role to the registered user: {Errors}", 
+                _logger.LogError("Failed to assign 'Admin' role to the registered user: {Errors}",
                     string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
                 return BadRequest("Failed to assign 'Admin' role to the registered user.");
             }
@@ -184,7 +184,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             var registrationResult = await _userManager.CreateAsync(user);
             if (!registrationResult.Succeeded)
             {
-                _logger.LogError("The 'User' account registration failed: {Errors}", 
+                _logger.LogError("The 'User' account registration failed: {Errors}",
                     string.Join(", ", registrationResult.Errors.Select(error => error.Description)));
                 return BadRequest("The account registration failed.");
             }
@@ -193,7 +193,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             var assigningRoleResult = await _userManager.AddToRoleAsync(user, AuthConstants.UserRole);
             if (!assigningRoleResult.Succeeded)
             {
-                _logger.LogError("Failed to assign' User' role to the registered user: {Errors}", 
+                _logger.LogError("Failed to assign' User' role to the registered user: {Errors}",
                     string.Join(", ", assigningRoleResult.Errors.Select(error => error.Description)));
                 return BadRequest("Failed to assign 'User' role to the registered user.");
             }
@@ -235,6 +235,12 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
     /// Invalid credentials. The requested account was not found, or the entered password 
     /// does not match the account, or failed to generate a sign-in token.
     /// </response>
+    /// <response code="403">
+    /// User exists, but email not confirmed.
+    /// </response>
+    /// <response code="409">
+    /// The account email was not confirmed.
+    /// </response>
     /// <response code="500">
     /// An unexpected error occurred while processing the request.
     /// </response>
@@ -261,7 +267,7 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
             //Checking if the email is confirmed before generating the token for login
             if (!user.EmailConfirmed)
             {
-                return Unauthorized("Please confirm the email. Confirmation link should be sended to your email.");
+                return Conflict("Please confirm the email. Confirmation link should be sended to your email.");
             }
 
             //Getting the list of all roles that the user is assigned
@@ -294,7 +300,8 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 message = "Login successful. You are now authenticated.",
                 token = new JwtSecurityTokenHandler().WriteToken(token),
                 expiration = token!.ValidTo,
-                user = user.UserName
+                user = user.UserName,
+                email = user.Email
             });
         }
         catch (Exception ex)
@@ -575,8 +582,57 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 Ok("The account successfully confirmed.") :
                 BadRequest("Request failed. Please contact the support team.");
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
+            return Exception(ex);
+        }
+    }
+
+
+    /// <summary>
+    /// Resends the email confirmation link to a registered user if the email is not confirmed.
+    /// </summary>
+    /// <param name="email">The email address of the user to confirm.</param>
+    /// <returns>A status message indicating whether the confirmation email was resent successfully.</returns>
+    /// <response code="200">The confirmation email was successfully sent or returned in the response.</response>
+    /// <response code="400">The email address is null, empty, or invalid.</response>
+    /// <response code="404">The account associated with the email address was not found.</response>
+    /// <response code="500">An internal server error occurred while processing the request.</response>
+    [HttpPost]
+    [Route("/account/confirmemail/resend")]
+    public async Task<ActionResult> ResendEmailConfirmationAsync([Required][FromBody]string email)
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                _logger.LogWarning("The provided email is null or empty");
+                return BadRequest(new { message = "The email cannot be null or empty" });
+            }
+            if (!new RegistrationModel().IsValidEmail(email))
+            {
+                _logger.LogWarning("The email not valid: '{Email}'.", email);
+                return BadRequest(new { message = "The email is invalid format." });
+            }
+
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user is null)
+            {
+                _logger.LogWarning("The user account was not found.");
+                return NotFound(new { message = "Account was not found." });
+            }
+
+            // Sends the confirmation email link to the account 'email'.
+            // For default accounts, skips email sending and returns the link directly in the response.
+            var emailSendResult = await SendConfirmationLinkAsync(user);
+
+            return emailSendResult ??
+                Ok(new { message = "Confirmation email sent. Please check your inbox." });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occurred while resending the confirmation email for '{Email}'.", email);
             return Exception(ex);
         }
     }
