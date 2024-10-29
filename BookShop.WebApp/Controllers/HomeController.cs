@@ -62,6 +62,7 @@ public class HomeController : Controller
     /// Displays the privacy policy page.
     /// </summary>
     /// <returns>An <see cref="IActionResult"/> representing the result of the action.</returns>
+    [TokenAuthorizationAttribute("userToken")]
     public IActionResult Privacy()
     {
         return View();
