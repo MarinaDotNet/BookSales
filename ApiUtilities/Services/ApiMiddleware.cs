@@ -36,6 +36,14 @@ public class ApiMiddleware(RequestDelegate next, IApiKeyValidator apiKeyValidato
     {
         try
         {
+            var excludedPaths = new[] { "/account/confirmemail"/*, "/account/confirmemail/resend"*/ };
+
+            if(excludedPaths.Contains(context.Request.Path.Value.ToLower()))
+            {
+                await _next(context);
+                return;
+            }
+
             // Check if the StockApiKey header is present
             if (!context.Request.Headers.TryGetValue(SecurityConstants.AuthApiKey, out var userApiKey) ||
                 string.IsNullOrWhiteSpace(userApiKey))
