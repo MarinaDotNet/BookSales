@@ -37,5 +37,26 @@ public static class ApiEndpoints
         /// </summary>
         /// <value>A string representing the URL to fetch JWT token data.</value>
         public static string GetLoginToken => $"{BaseAccountApiUrl}/account/login";
+
+        /// <summary>Gets the send register request.</summary>
+        /// <value>The send register request.</value>
+        public static string SendRegisterRequest => $"{BaseAccountApiUrl}/new";
+
+        /// <summary>Gets the re send confirmation request.</summary>
+        /// <value>The re send confirmation request.</value>
+        public static string ReSendConfirmationRequest => $"{BaseAccountApiUrl}/account/confirmemail/resend";
+
+        /// <summary>Gets the send password change request.</summary>
+        /// <value>The send password change request.</value>
+        public static string SendPasswordChangeRequest => $"{BaseAccountApiUrl}/account/password/reset";
+
+
+        /// <summary>Gets the send update account request.</summary>
+        /// <value>The send update account request.</value>
+        public static string SendUpdateAccountRequest => $"{BaseAccountApiUrl}/account/update";
+
+        /// <summary>Gets the send delete account request.</summary>
+        /// <value>The send delete account request.</value>
+        public static string SendDeleteAccountRequest => $"{BaseAccountApiUrl}/account/delete";
     }
 }
