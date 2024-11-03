@@ -1,0 +1,257 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>BookShop.WebApp</name>
+    </assembly>
+    <members>
+        <member name="T:BookShop.WebApp.Controllers.AccountController">
+            <summary>
+            Handles user account-related actions such as login, registration and account management.
+            </summary>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.#ctor(Microsoft.Extensions.Logging.ILogger{BookShop.WebApp.Controllers.AccountController},Microsoft.Extensions.Caching.Memory.IMemoryCache,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BookShop.WebApp.Controllers.AccountController"/> class.
+            </summary>
+            <param name="logger">The logger for logging information and errors.</param>
+            <param name="memoryCache">The memory cache for storing tokens and related data.</param>
+            <param name="configuration">The configuration for accessing application settings.</param>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.LoginPage">
+            <summary>
+            Redirects to the LoginPage View.
+            </summary>
+            <returns>
+            A <see cref="T:Microsoft.AspNetCore.Mvc.ViewResult"/> that renders the LoginPage View.
+            </returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.LoginAsync(System.String,System.String)">
+            <summary>
+            Asynchronously logs in an user.
+            </summary>
+            <param name="email">The user's email address.</param>
+            <param name="password">The user's password.</param>
+            <returns>
+            A <see cref="T:Microsoft.AspNetCore.Mvc.RedirectToActionResult"/> to the <see cref="T:BookShop.WebApp.Controllers.HomeController"/> and its <see cref="M:BookShop.WebApp.Controllers.HomeController.Index"/> action 
+            if the login is successful; 
+            a <see cref="T:Microsoft.AspNetCore.Mvc.ViewResult"/> to the Login View if the login fails; 
+            or an <see cref="M:BookShop.WebApp.Controllers.AccountController.Error"/> error page if <paramref name="email"/> or <paramref name="password"/> is null or empty.
+            </returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.RegisterPage">
+            <summary>
+            Redirects to the RegisterPage View.
+            </summary>
+            <returns>
+            A <see cref="T:Microsoft.AspNetCore.Mvc.ViewResult"/> that renders the RegisterPage View.
+            </returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.RegisterAsync(System.String,System.String,System.String,System.String,System.String)">
+            <summary>
+            Asynchronously register an user.
+            </summary>
+            <returns>
+            </returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.Error">
+            <summary>
+            Displays the error page when an error occurs.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the error view.</returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.AccountController.StoreTokenFromResponseAsync(System.Net.Http.HttpResponseMessage,System.String)">
+            <summary>Stores the token from response asynchronous in IMemory cache.</summary>
+            <param name="response">The response containing the token and its data.</param>
+            <param name="cacheKey">The cache key under which the token and its data will be stored.</param>
+            <returns>
+            <see langword="true"/> if the token and expiration date are present, not expired, 
+            and there are no JSON deserialization errors; otherwise, <see langword="false"/>.
+            </returns>
+            <exception cref="T:System.Text.Json.JsonException">Thrown when the deserialized response is null.</exception>
+        </member>
+        <member name="T:BookShop.WebApp.Controllers.AccountController.LoginRequestDto">
+            <summary>
+            DTO class for login requests
+            </summary>
+        </member>
+        <member name="T:BookShop.WebApp.Controllers.HomeController">
+            <summary>
+            Controller for handling home-related actions such as displaying the index page and privacy information.
+            </summary>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.HomeController.#ctor(Microsoft.Extensions.Logging.ILogger{BookShop.WebApp.Controllers.HomeController},Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            Initializes a new instance of the <see cref="T:BookShop.WebApp.Controllers.HomeController"/> class.
+            </summary>
+            <param name="logger">The logger instance for logging information and errors.</param>
+            <param name="configuration">The configuration settings for the application.</param>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.HomeController.Index">
+            <summary>
+            Displays the index page with a list of books.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the result of the action.</returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.HomeController.Privacy">
+            <summary>
+            Displays the privacy policy page.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the result of the action.</returns>
+        </member>
+        <member name="M:BookShop.WebApp.Controllers.HomeController.Error">
+            <summary>
+            Displays the error page when an error occurs.
+            </summary>
+            <returns>An <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> representing the error view.</returns>
+        </member>
+        <member name="T:BookShop.WebApp.Models.ProductViewModel">
+            <summary>
+            ViewModel representing a product with details of a single book and a collection of books.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ProductViewModel.Book">
+            <summary>
+            Gets or sets the current book being viewed or managed.
+            This is initialized with a new instance of the <see cref="T:ApiUtilities.Models.Book"/> class by default.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ProductViewModel.Books">
+            <summary>
+            Gets or sets the collection of books.
+            By default, this is initialized as an empty collection of <see cref="T:ApiUtilities.Models.Book"/>.
+            </summary>
+        </member>
+        <member name="T:BookShop.WebApp.Models.ViewModel">
+            <summary>
+            ViewModel representing various data related to product, filtering, ordering, and errors.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ViewModel.Genres">
+            <summary>
+            Gets or sets the genres associated with the current product.
+            Initialized with a default value of <c>"undefined"</c>.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ViewModel.Product">
+            <summary>
+            Gets or sets the product-related information.
+            Initialized with a new instance of the <see cref="T:BookShop.WebApp.Models.ProductViewModel"/> class.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ViewModel.Filter">
+            <summary>
+            Gets or sets the filtering criteria for products.
+            Initialized with a new instance of the <see cref="T:BookShop.WebApp.Models.FilterModel"/> class.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ViewModel.Order">
+            <summary>
+            Gets or sets the ordering information for sorting products.
+            Initialized with a new instance of the <see cref="T:BookShop.WebApp.Models.OrderViewModel"/> class.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Models.ViewModel.ErrorView">
+            <summary>
+            Gets or sets the error details if an error occurs.
+            Initialized with a new instance of the <see cref="T:BookShop.WebApp.Models.ErrorViewModel"/> class.
+            </summary>
+        </member>
+        <member name="T:BookShop.WebApp.Services.ApiEndpoints">
+            <summary>
+            Static class that holds API endpoints for the application.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.BaseBookApiUrl">
+            <summary>
+            Base URL for the Book API. This should be set to the root URL of the Book API service.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.BaseAccountApiUrl">
+            <summary>
+            Base URL for the AuthAccount API. This should be set to the root URL of the AuthAccount API service.
+            </summary>
+        </member>
+        <member name="T:BookShop.WebApp.Services.ApiEndpoints.Books">
+            <summary>
+            Static class that contains endpoints related to books.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Books.GetAll">
+            <summary>
+            Gets the endpoint for retrieving all books.
+            </summary>
+            <value>A string representing the URL to fetch all books.</value>
+        </member>
+        <member name="T:BookShop.WebApp.Services.ApiEndpoints.Account">
+            <summary>
+            Static class that contains endpoints-related authorization in user account.
+            </summary>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.GetLoginToken">
+            <summary>
+            Gets the  endpoint for retieving JWT token data.
+            </summary>
+            <value>A string representing the URL to fetch JWT token data.</value>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.SendRegisterRequest">
+            <summary>Gets the send register request.</summary>
+            <value>The send register request.</value>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.ReSendConfirmationRequest">
+            <summary>Gets the re send confirmation request.</summary>
+            <value>The re send confirmation request.</value>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.SendPasswordChangeRequest">
+            <summary>Gets the send password change request.</summary>
+            <value>The send password change request.</value>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.SendUpdateAccountRequest">
+            <summary>Gets the send update account request.</summary>
+            <value>The send update account request.</value>
+        </member>
+        <member name="P:BookShop.WebApp.Services.ApiEndpoints.Account.SendDeleteAccountRequest">
+            <summary>Gets the send delete account request.</summary>
+            <value>The send delete account request.</value>
+        </member>
+        <member name="T:BookShop.WebApp.Services.TokenAuthorizationAttribute">
+            <summary>
+            A custom authorization attribute for methods that checks if the current user is authorized to access the data.
+            </summary>
+            <remarks>
+            This attribute performs authorization by verifying the availability and validity of the token data stored in the cache using the specified
+            <paramref name="cacheKey"/>. 
+            It checks whether the token exists, and if so, validates its expiration date and time to ensure the token is still valid.
+            If the current UTC time is earlier than or equal to the token's expiration time, the method proceeds normally and authorization is 
+            granted (i.e., the method returns without further action). 
+            Otherwise, if the token has expired, an unauthorized result is returned, preventing access to the requested resource.
+            </remarks>
+            <param name="cacheKey">
+            The specified cache key used to look up token data in the cache.
+            </param>
+        </member>
+        <member name="M:BookShop.WebApp.Services.TokenAuthorizationAttribute.#ctor(System.String)">
+            <summary>
+            A custom authorization attribute for methods that checks if the current user is authorized to access the data.
+            </summary>
+            <remarks>
+            This attribute performs authorization by verifying the availability and validity of the token data stored in the cache using the specified
+            <paramref name="cacheKey"/>. 
+            It checks whether the token exists, and if so, validates its expiration date and time to ensure the token is still valid.
+            If the current UTC time is earlier than or equal to the token's expiration time, the method proceeds normally and authorization is 
+            granted (i.e., the method returns without further action). 
+            Otherwise, if the token has expired, an unauthorized result is returned, preventing access to the requested resource.
+            </remarks>
+            <param name="cacheKey">
+            The specified cache key used to look up token data in the cache.
+            </param>
+        </member>
+        <member name="M:BookShop.WebApp.Services.TokenAuthorizationAttribute.OnAuthorization(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
+            <summary>
+            Called early in the filter pipeline to confirm request is authorized.
+            </summary>
+            <param name="context">
+            The <see cref="T:Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext">AuthorizationFilterContext</see>.
+            </param>
+        </member>
+    </members>
+</doc>

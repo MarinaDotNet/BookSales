@@ -22,6 +22,27 @@
   },
   {
     "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
+    "Method": "ResendEmailConfirmationAsync",
+    "RelativePath": "account/confirmemail/resend",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      },
+      {
+        "Name": "Api-Version",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "AuthAccount.API.Controllers.AccountV1Controller",
     "Method": "DeleteAsync",
     "RelativePath": "account/delete",
     "HttpMethod": "DELETE",
