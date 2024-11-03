@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "Resend Confirm Link";
+}
+@model ViewModel
+
+
+<body id="registerpage">
+
+    <form asp-controller="Account" asp-action="ResendEmailConfirmation" method="post" class="input-form">
+        <h3 class="form-header">Please confirm your account.</h3>
+        <div class="input-group-text">
+            @if (!Model.ErrorView.IsErrorViewModelIsEmpty)
+            {
+                <p class="text-danger form-center-text">@Model.ErrorView.AdditionalMessage</p>
+            }
+            @if(!string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+            {
+                <p class="form-center-text">@Model.AccountView.RegistrationMessage</p>
+            }
+            <p>Didn't receive the email?<br />You can resend it using the form below or contact the support team for assistance</p>
+            <input class="form-control" id="email" name="email" type="email" placeholder="Enter your email for resending the confirmation link." required />
+            <button class="btn btn-primary my-btn form-control" type="submit">Resend Confirmation Email Link</button>
+        </div>
+    </form>
+
+</body>

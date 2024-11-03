@@ -1,0 +1,40 @@
+﻿@using Microsoft.Extensions.Caching.Memory
+@{
+    ViewData["Title"] = "Change Login";
+}
+
+@model ViewModel
+@inject IMemoryCache _userCache
+
+<body id="loginchangepage">
+    <div class="account">
+
+        <partial name="/Views/Shared/_AccountPartial.cshtml" />
+
+        <div class="account-data">
+            <form asp-controller="Account" asp-action="ChangeLogin" method="post" class="input-form">
+                <h3 class="form-header">Change account login:</h3>
+                <div class="input-group-text">
+                    @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
+                    {
+                        <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
+                    }
+
+                    <div class="form-group">
+                        <p>
+                            <b>Account login:</b> 
+                            @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
+                                !string.IsNullOrWhiteSpace(userCache.userName))
+                                {
+                                    @userCache.userName
+                                }</p>
+                        <input class="form-control" id="newLogin" name="newLogin" type="text" placeholder="Enter your new login/username" required />
+                        <input class="form-control" id="accountPassword" name="accountPassword" type="password" placeholder="Enter your account password" required />
+                    </div>
+
+                    <button class="btn btn-primary my-btn form-control" type="submit">Change</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>

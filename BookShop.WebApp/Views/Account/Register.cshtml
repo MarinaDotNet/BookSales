@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Register";
+}
+@model ViewModel
+
+@if(string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+{
+    <body id="registerpage">
+
+        <form asp-controller="Account" asp-action="Register" method="post" class="input-form">
+            <h3 class="form-header">Register:</h3>
+            <div class="input-group-text">
+                @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
+                {
+                    <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
+                }
+
+                <input class="form-control" id="userName" name="userName" type="text" placeholder="Enter unique user name" />
+                <div class="form-group">
+                    <input class="form-control" id="email" name="email" type="email" placeholder="Enter your email for registration" />
+                    <input class="form-control" id="confirmationEmail" name="confirmationEmail" type="email" placeholder="Confirm your email" />
+                </div>
+
+                <div class="form-group">
+                    <input class="form-control" id="password" name="password" type="password" placeholder="Enter your password" />
+                    <input class="form-control" id="confirmationPassword" name="confirmationPassword" type="password" placeholder="Confirm your account password" />
+                </div>
+
+                <button class="btn btn-primary my-btn form-control" type="submit">Register</button>
+                <label class="button-top-label" for="login">Do you have an account?</label>
+                <a id="login" name="login" class="btn btn-primary my-btn form-control" asp-controller="Account" asp-action="LoginPage" value="Login">Login</a>
+            </div>
+        </form>
+
+    </body>
+}
+else
+{
+    <p>@Model.AccountView.RegistrationMessage</p>
+}
