@@ -36,4 +36,12 @@ public class ViewModel
     /// Initialized with a new instance of the <see cref="ErrorViewModel"/> class.
     /// </summary>
     public ErrorViewModel ErrorView { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the account view details.
+    /// </summary>
+    /// <value>
+    /// The account view.
+    /// </value>
+    public AccountViewModel AccountView { get; set; } = new();
 }
