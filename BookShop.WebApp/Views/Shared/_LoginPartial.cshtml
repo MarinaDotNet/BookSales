@@ -8,9 +8,10 @@
 <link rel="stylesheet" href="~/BookShop.WebApp.styles.css" asp-append-version="true" />
 
 <ul id="accountBar" class="navbar-nav flex-grow-1">
-    @if(_userCache.TryGetValue("usertoken", out(string token, string expiry, string userName) userCache) &&
+    @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
     !string.IsNullOrWhiteSpace(userCache.token) &&
     !string.IsNullOrWhiteSpace(userCache.userName) &&
+    !string.IsNullOrWhiteSpace(userCache.email) &&
     DateTime.TryParse(userCache.expiry, out DateTime dateTime) &&
     DateTime.UtcNow <= dateTime.ToUniversalTime())
     {
