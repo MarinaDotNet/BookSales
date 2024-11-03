@@ -495,6 +495,16 @@ public class AccountV1Controller(UserManager<ApiUser> userManager, IConfiguratio
                 return Unauthorized("Lack the necessary permissions to update this account.");
             }
 
+            if(!string.IsNullOrWhiteSpace(model.UpdatedEmailAddress) && 
+                await DoesEmailExistsAsync(model.UpdatedEmailAddress))
+            {
+                return BadRequest("The account with specified 'new email' already exists.");
+            }
+            if (!string.IsNullOrWhiteSpace(model.UpdatedLogin) &&
+                await DoesNameExistsAsync(model.UpdatedLogin))
+            {
+                return BadRequest("The account with specified 'new login' already exists.");
+            }
             string beforeUpdateEmail = user.Email!;
 
             //Check if the updated login value is provided and is different from the current username.
