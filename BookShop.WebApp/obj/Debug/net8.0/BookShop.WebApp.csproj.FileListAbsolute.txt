@@ -48,3 +48,4 @@ C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\BookShop.WebAp
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\BookShop.WebApp\obj\Debug\net8.0\BookShop.WebApp.csproj.AssemblyReference.cache
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\BookShop.WebApp\obj\Debug\net8.0\BookShop.2D3556AB.Up2Date
 C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\BookShop.WebApp\bin\Debug\net8.0\MongoDB.Bson.dll
+C:\Users\msich\Documents\ProgrammingPractice\CSharp\BookSales.API\BookShop.WebApp\bin\Debug\net8.0\libman.json
