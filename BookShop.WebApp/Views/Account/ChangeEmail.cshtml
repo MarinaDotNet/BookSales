@@ -13,29 +13,39 @@
         <div class="account-data">
             <form asp-controller="Account" asp-action="ChangeEmail" method="post" class="input-form">
                 <h3 class="form-header">Change account email:</h3>
-                <div class="input-group-text">
-                    @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
+                @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
+                {
+                    <p class="text-danger">@Model!.ErrorView.AdditionalMessage</p>
+                }
+                @if (Model is not null && !string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+                {
+                    <p class="">@Model.AccountView.RegistrationMessage</p>
+                }
+                <p>
+                    <b>Account email:</b>
+                    @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
+                    !string.IsNullOrWhiteSpace(userCache.userName))
                     {
-                        <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
+                        @userCache.email
                     }
-
-                    <div class="form-group">
-                        <p>
-                            <b>Account email:</b>
-                            @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
-                            !string.IsNullOrWhiteSpace(userCache.userName))
-                            {
-                                @userCache.email
-                            }
-                        </p>
-                        <input class="form-control" id="password" name="password" type="password" placeholder="Enter your current account password" required />
-
-                        <input class="form-control" id="email" name="email" type="email" placeholder="Enter your new account email" required />
-                        <input class="form-control" id="confirmEmail" name="confirmEmail" type="email" placeholder="Enter your new account email" required />
-                    </div>
-
-                    <button class="btn btn-primary my-btn form-control" type="submit">Change</button>
+                </p>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" required>
                 </div>
+                <div class="mb-3">
+                    <label for="email" class="form-label">New email address</label>
+                    <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp" placeholder="Enter your new account email" required>
+                    <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                </div>
+
+                <div class="mb-3">
+                    <label for="confirmEmail" class="form-label">Confirm email</label>
+                    <input type="email" class="form-control" id="confirmEmail" name="confirmEmail" placeholder="Confirm your email" required>
+                </div>
+
+                <button type="submit" class="btn btn-primary my-btn form-control">Change</button>
+
             </form>
         </div>
     </div>
