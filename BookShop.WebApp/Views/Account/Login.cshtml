@@ -4,25 +4,32 @@
 @model ViewModel
 
 <body id="loginpage">
-
     <form asp-controller="Account" asp-action="Login" method="post" class="input-form">
         <h3 class="form-header">Login:</h3>
-        <div class="input-group-text">
+
+        <div class="mb-3">
             @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
             {
-                <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
+                <p class="text-danger">@Model!.ErrorView.AdditionalMessage</p>
             }
-            @if(Model is not null && !string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+            @if (Model is not null && !string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
             {
-                <p class="form-center-text">@Model.AccountView.RegistrationMessage</p>
+                <p class="">@Model.AccountView.RegistrationMessage</p>
             }
-            <input class="form-control" id="email" name="email" type="email" placeholder="Enter your email for login" />
-            <input class="form-control" id="password" name="password" typeof="password" placeholder="Enter your password" />
+            <label for="email" class="form-label">Email address</label>
+            <input type="email" class="form-control" id="email" name="email" aria-describedby="emailHelp">
+            <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+        </div>
+        <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password">
+        </div> 
+        
+        <button type="submit" class="btn btn-primary my-btn form-control">Login</button>
 
-            <button class="btn btn-primary my-btn form-control" type="submit">Login</button>
-            <label class="button-top-label" for="register">Do not have an account?</label>
+        <div class="mb-3">
+            <div id="formHelp" class="form-text">Do not have an account yet? Register now.</div>
             <a id="register" name="register" class="btn btn-primary my-btn form-control" asp-controller="Account" asp-action="RegisterPage" value="Register">Register</a>
         </div>
     </form>
-
 </body>
