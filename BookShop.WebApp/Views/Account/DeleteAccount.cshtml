@@ -6,29 +6,58 @@
 @inject IMemoryCache _userCache
 
 <body id="deleteaccountpage">
+    <div class="account">
 
+    
     <partial name="/Views/Shared/_AccountPartial.cshtml" />
-
-    @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
-          !string.IsNullOrWhiteSpace(userCache.userName)) { }
-    <form asp-controller="Account" asp-action="DeleteAccount" method="post" class="input-form">
-        <h1>@userCache.userName, we are sorry to see you go!</h1>
-        @if(Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
-        {
-            <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
-        }
-        <p>
-            <b>Delete account:</b> @userCache.userName
-            </p>
-
-        <input class="form-control" id="accountPassword" name="accountPassword" type="password" placeholder="Enter your account password" value="@string.Empty"/>
-
-        <p>Are you shure?</p>
-        <input type="checkbox" id="isConfirmed" name="isConfirmed" value="true">
-        <label for="isConfirmed">Tick to delete account</label>
-        <p class="text-danger">The deletion precess would not be abortable</p>
-
-        <button class="btn btn-danger my-btn form-control" type="submit" >Delete</button>
+    
+    <div class="account-data">
+        <form asp-controller="Account" asp-action="DeleteAccount" method="post" class="input-form">
+            <h3 class="form-header">Change account login:</h3>
+            @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
+            {
+                <p class="text-danger">@Model!.ErrorView.AdditionalMessage</p>
+            }
+            @if (Model is not null && !string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+            {
+                <p class="">@Model.AccountView.RegistrationMessage</p>
+            }
         
-    </form> 
+            <h1>
+                @if (_userCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
+            !string.IsNullOrWhiteSpace(userCache.userName))
+            {@userCache.userName}, we are sorry to see you go!
+            </h1>
+            <h3>Account Data:</h3>
+            <p>
+                <b>Account login:</b>
+                @if (!string.IsNullOrWhiteSpace(userCache.userName))
+                {
+                    @userCache.userName
+                }
+            </p>
+            <p>
+                <b>Account email:</b>
+                @if(!string.IsNullOrWhiteSpace(userCache.email))
+                {
+                    @userCache.email
+                }
+            </p>
+            <div class="mb-3">
+                <label for="accountPassword" class="form-label">Password</label>
+                <input type="password" class="form-control" id="accountPassword" name="accountPassword" required placeholder="Enter your account password">
+            </div>
+        
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="isConfirmed" name="isConfirmed" value="true">
+                <label class="form-check-label" for="isConfirmed">
+                    Are you sure?
+                </label>
+            </div>
+            <p class="text-danger">The deletion precess would not be abortable</p>
+            <button type="submit" class="btn btn-danger my-btn form-control">Delete</button>
+
+        </form>
+        </div>
+    </div>
 </body>
