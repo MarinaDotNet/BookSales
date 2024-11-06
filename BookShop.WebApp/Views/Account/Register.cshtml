@@ -6,32 +6,54 @@
 @if(string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
 {
     <body id="registerpage">
-
         <form asp-controller="Account" asp-action="Register" method="post" class="input-form">
             <h3 class="form-header">Register:</h3>
-            <div class="input-group-text">
+
+            <div class="mb-3">
                 @if (Model is not null && !string.IsNullOrWhiteSpace(Model.ErrorView.AdditionalMessage))
                 {
-                    <p class="text-danger form-center-text">@Model!.ErrorView.AdditionalMessage</p>
+                    <p class="text-danger">@Model!.ErrorView.AdditionalMessage</p>
                 }
+                @if (Model is not null && !string.IsNullOrWhiteSpace(Model.AccountView.RegistrationMessage))
+                {
+                    <p class="">@Model.AccountView.RegistrationMessage</p>
+                }
+            </div>
 
-                <input class="form-control" id="userName" name="userName" type="text" placeholder="Enter unique user name" />
-                <div class="form-group">
-                    <input class="form-control" id="email" name="email" type="email" placeholder="Enter your email for registration" />
-                    <input class="form-control" id="confirmationEmail" name="confirmationEmail" type="email" placeholder="Confirm your email" />
-                </div>
+            <div class="mb-3">
+                <label for="userName" class="form-label">Name/Login</label>
+                <input type="text" class="form-control" id="userName" name="userName" placeholder="Enter unique user name">
+            </div>
 
-                <div class="form-group">
-                    <input class="form-control" id="password" name="password" type="password" placeholder="Enter your password" />
-                    <input class="form-control" id="confirmationPassword" name="confirmationPassword" type="password" placeholder="Confirm your account password" />
-                </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email for registration" aria-describedby="emailHelp">
+            </div>
+            <div id="emailHelp" class="form-text">
+                We'll never share your email with anyone else.
+            </div>
+            <div class="mb-3">
+                <label for="confirmationEmail" class="form-label">Confirm email</label>
+                <input type="email" class="form-control" id="confirmationEmail" name="confirmationEmail" placeholder="Confirm your email">
+            </div>
 
-                <button class="btn btn-primary my-btn form-control" type="submit">Register</button>
-                <label class="button-top-label" for="login">Do you have an account?</label>
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
+            </div>
+
+            <div class="mb-3">
+                <label for="confirmationPassword" class="form-label">Confirmation Password</label>
+                <input type="password" class="form-control" id="confirmationPassword" name="confirmationPassword" placeholder="Confirm your account password">
+            </div>
+
+            <button type="submit" class="btn btn-primary my-btn form-control">Register</button>
+
+            <div class="mb-3">
+                <div id="formHelp" class="form-text">Do you have an account already? Login into your account.</div>
                 <a id="login" name="login" class="btn btn-primary my-btn form-control" asp-controller="Account" asp-action="LoginPage" value="Login">Login</a>
             </div>
         </form>
-
     </body>
 }
 else
