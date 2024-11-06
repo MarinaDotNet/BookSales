@@ -49,7 +49,10 @@ h6 {
 }
 
 /*#region card components*/
-
+.card{
+    align-items: stretch;
+    justify-content: space-between;
+}
 .card-buttons
 {
     display: flex;
@@ -65,6 +68,11 @@ h6 {
 }
 .card-footer {
     max-height: fit-content;
+    min-height: fit-content;
+
+    display: flex;
+    flex-wrap: wrap;
+    align-content: center;
 }
 
 .card-footer:hover {
@@ -75,6 +83,7 @@ div.card {
     background-color: #EAD7BB !important;
     color: #081B21 !important;
     border: 3px solid #BCA37F !important;
+
 }
 
 div.card:hover {
@@ -84,14 +93,15 @@ div.card:hover {
 
 /*#region buttons*/
 
-button,
-a.btn-primary.my-btn {
+button.btn-primary,
+a.btn-primary.my-btn,
+.btn-danger {
     background-color: #D3BD9D !important;
     color: #312421 !important;
     border: 1px solid #BCA37F !important;
 }
 
-button:hover,
+button.btn-primary:hover,
 a.btn-primary.my-btn:hover {
     border: 1px solid #350A08 !important;
     background-color: #493531 !important;
@@ -107,9 +117,37 @@ a.btn-primary.my-btn:hover {
     box-shadow: 0 0 0 0.1rem #350A08, 0 0 1rem white !important;
 }
 
+.btn-danger:focus,
+.btn-danger:hover {
+    background-color: #660000 !important;
+    color: #FBDC93 !important;
+}
 /*#endregion buttons*/
-
 /*#region of input and select*/
+form.input-form {
+    width: min(40rem, 90%);
+    justify-self: center;
+}
+
+.account{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.account-data{
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: stretch;
+    padding: 2rem;
+    width: min(30rem, 100%);
+    justify-content: center;
+    align-content: center;
+}
+
 div.input-group-text {
     background-color: #FFF2D8 !important;
     color: #312421 !important;
@@ -126,13 +164,16 @@ input:active, input::after, select:active, select::after, input:focus, select:fo
     border: 3px solid #493531 !important;
     box-shadow: 2px 2px 10px 2px #32424b !important;
 }
+
+.form-check-input[type=checkbox]:checked {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%233D2C29' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3E%3C/svg%3E") !important;
+}
 /*#endregion*/
-
 /*#region text decorations*/
-
 a.card-link {
     color: #312421 !important;
 }
+
 .nav-link,
 .navbar-brand {
     color: #FEF7E6 !important;
@@ -156,6 +197,10 @@ a.card-link:hover,
     color: #660000;
     text-decoration: 1px underline double #990000;
     text-shadow: 1px 1px 2px #000, 0 0 1rem #edddc4, 0 0 0.2rem #f3e8d8;
+}
+
+.text-danger {
+    color: #b30000 !important;
 }
 /*#endregion text decorations*/
 
