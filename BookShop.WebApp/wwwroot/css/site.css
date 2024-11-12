@@ -102,7 +102,8 @@ a.btn-primary.my-btn,
 }
 
 button.btn-primary:hover,
-a.btn-primary.my-btn:hover {
+a.btn-primary.my-btn:hover,
+a.btn-primary.my-btn.active{
     border: 1px solid #350A08 !important;
     background-color: #493531 !important;
     color: #F7BB2E !important;
@@ -160,10 +161,15 @@ input, select {
     border: 3px solid #BCA37F !important;
 }
 
-input:active, input::after, select:active, select::after, input:focus, select:focus {
-    border: 3px solid #493531 !important;
-    box-shadow: 2px 2px 10px 2px #32424b !important;
-}
+    input:active,
+    input::after,
+    select:active,
+    select::after,
+    input:focus,
+    select:focus {
+        border: 3px solid #493531 !important;
+        box-shadow: 2px 2px 10px 2px #32424b !important;
+    }
 
 .form-check-input[type=checkbox]:checked {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath fill='none' stroke='%233D2C29' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3E%3C/svg%3E") !important;
