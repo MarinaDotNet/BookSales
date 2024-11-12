@@ -25,6 +25,22 @@ public static class ApiEndpoints
         /// </summary>
         /// <value>A string representing the URL to fetch all books.</value>
         public static string GetAll => $"{BaseBookApiUrl}/all";
+
+        /// <summary>
+        /// Gets the total amount of all books.
+        /// </summary>
+        /// <value>
+        /// The get count all books.
+        /// </value>
+        public static string GetCountAll => $"{BaseBookApiUrl}/all/count";
+
+        /// <summary>
+        /// Gets the get all genres.
+        /// </summary>
+        /// <value>
+        /// The get all genres.
+        /// </value>
+        public static string GetAllGenres => $"{BaseBookApiUrl}/all/genres";
     }
 
     /// <summary>
