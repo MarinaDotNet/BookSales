@@ -44,4 +44,12 @@ public class ViewModel
     /// The account view.
     /// </value>
     public AccountViewModel AccountView { get; set; } = new();
+
+    /// <summary>
+    /// Gets or sets the pagination.
+    /// </summary>
+    /// <value>
+    /// The pagination.
+    /// </value>
+    public PaginationModel Pagination { get; set; } = new(5, 1);
 }
