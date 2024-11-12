@@ -35,7 +35,7 @@ public class TokenAuthorizationAttribute(string cacheKey) : Attribute, IAuthoriz
     {
         var memoryCache = (IMemoryCache)context.HttpContext.RequestServices.GetService(typeof(IMemoryCache))!;
 
-        if (memoryCache.TryGetValue(_cacheKey, out (string token, string expiry, string userName) cachedValue))
+        if (memoryCache.TryGetValue(_cacheKey, out (string token, string expiry, string userName, string email) cachedValue))
         {
             DateTime expires = DateTime.Parse(cachedValue.expiry).ToUniversalTime();
 
