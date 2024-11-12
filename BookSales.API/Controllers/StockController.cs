@@ -348,6 +348,56 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
         }
     }
 
+    /// <summary>
+    /// Retrieves all books genres asynchronously from the database, filtered by availability if specified.
+    /// </summary>
+    /// <param name="isAvailable">An optional filter for availability; if <c>true</c>, only genres of available books are returned; 
+    /// if <c>false</c>, only genres of unavailable books are returned; if <c>null</c>, genres of all books are returned.</param>
+    /// <returns>A list of genres in lowercase; otherwise, a 404 response if no genres are found, 
+    /// or a 500 response if an error occurs during processing.</returns>
+    /// <response code="200">Genres retrieved successfully.</response>
+    /// <response code="404">No genres were found in the database.</response>
+    /// <response code="500">An error occurred while processing the request.</response>
+    [HttpGet("all/genres")]
+    public async Task<ActionResult<IEnumerable<string>>> GetAllBooksGenresAsync(bool? isAvailable)
+    {
+        try
+        {
+            var books = await _service.GetAllDataAsync(isAvailable);
+            
+            var genres = new HashSet<string>();
+            
+            if(books is not null && books.Count != 0)
+            {
+                genres.UnionWith(
+                    books
+                    .SelectMany(book => book.Genres)
+                    .Where(genre =>!string.IsNullOrWhiteSpace(genre))
+                    .Select(genre => genre.ToLowerInvariant())
+                    );
+            }
+
+            return genres is not null && genres.Count != 0 ? 
+                Ok(genres) : 
+                NotFound("No genres found in the database.");
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
     #region Http Get Count Methods
 
     /// <summary>
@@ -973,6 +1023,55 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
             return books.Count > 0 ?
                 Ok(books) :
                 NotFound("No books found with the specified sorting criteria.");
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
+
+    /// <summary>
+    /// Retrieves all books genres asynchronously from the database, filtered by availability if specified.
+    /// </summary>
+    /// <returns>A list of genres in lowercase if available; otherwise, a 404 response if no genres are found, 
+    /// or a 500 response if an error occurs during processing.</returns>
+    /// <response code="200">Genres retrieved successfully.</response>
+    /// <response code="404">No genres were found in the database.</response>
+    /// <response code="500">An error occurred while processing the request.</response>
+    [HttpGet("all/genres")]
+    public async Task<ActionResult<IEnumerable<string>>> GetAllBooksGenresAsync()
+    {
+        try
+        {
+            var books = await _service.GetAllDataAsync(true);
+
+            var genres = new HashSet<string>();
+
+            if (books is not null && books.Count != 0)
+            {
+                genres.UnionWith(
+                    books
+                    .SelectMany(book => book.Genres)
+                    .Where(genre => !string.IsNullOrWhiteSpace(genre))
+                    .Select(genre => genre.ToLowerInvariant())
+                    );
+            }
+
+            return genres is not null && genres.Count != 0 ?
+                Ok(genres) :
+                NotFound("No genres found in the database.");
         }
         catch (ApplicationException ex)
         {
