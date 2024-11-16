@@ -95,7 +95,8 @@ div.card:hover {
 
 button.btn-primary,
 a.btn-primary.my-btn,
-.btn-danger {
+.btn-danger,
+button.btn.btn-outline-secondary {
     background-color: #D3BD9D !important;
     color: #312421 !important;
     border: 1px solid #BCA37F !important;
@@ -103,7 +104,8 @@ a.btn-primary.my-btn,
 
 button.btn-primary:hover,
 a.btn-primary.my-btn:hover,
-a.btn-primary.my-btn.active{
+a.btn-primary.my-btn.active,
+button.btn.btn-outline-secondary:hover {
     border: 1px solid #350A08 !important;
     background-color: #493531 !important;
     color: #F7BB2E !important;
@@ -114,7 +116,8 @@ a.btn-primary.my-btn.active{
 .btn:active:focus,
 .btn-link.nav-link:focus,
 .form-control:focus,
-.form-check-input:focus {
+.form-check-input:focus,
+button.btn.btn-outline-secondary:focus {
     box-shadow: 0 0 0 0.1rem #350A08, 0 0 1rem white !important;
 }
 
@@ -208,8 +211,13 @@ a.card-link:hover,
 .text-danger {
     color: #b30000 !important;
 }
-/*#endregion text decorations*/
 
+.input-group-text {
+    background-color: #FFF2D8;
+    color: #312421;
+    border: 3px solid #BCA37F !important;
+}
+/*#endregion text decorations*/
 /*#region media screen sizes*/
 @media screen and (min-width: 1000px) {
     .col-sm-4 {
