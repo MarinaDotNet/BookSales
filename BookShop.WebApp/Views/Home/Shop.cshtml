@@ -13,14 +13,12 @@
 @model ViewModel
 
 <body id="shoppage">
-    <form asp-controller="Home" asp-action="Search" method="post">
-        <div class="input-group mb-3">
-            <input type="text" class="form-control" id="tearm" name="tearm" placeholder="search" />
-            <button class="btn btn-outline-secondary" type="submit">Search</button>
-        </div>
-    </form>
-
     <form asp-controller="Home" asp-action="Filter" method="post">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="expression" name="expression" placeholder="search" />
+            <button class="btn btn-outline-secondary" type="submit" asp-controller="Home" asp-action="Search">Search</button>
+        </div>
+
         <div class="input-group mb-3">
             <label class="input-group-text" for="genre">Genres</label>
             <select id="genre" name="genre" class="form-select">
@@ -36,11 +34,11 @@
                     {
                         @if (Model.Filter.SelectedGenre.Equals(Model.Genres[i]))
                         {
-                            <option value="Model.Genres[i]" selected>@Model.Genres[i]</option>
+                            <option value="@Model.Genres[i]" selected>@Model.Genres[i]</option>
                         }
                         else
                         {
-                            <option value="Model.Genres[i]">@Model.Genres[i]</option>
+                            <option value="@Model.Genres[i]">@Model.Genres[i]</option>
                         }
                     }
                 </select>
@@ -59,7 +57,7 @@
                     }
                 </select>
 
-            <button class="btn btn-outline-secondary" type="submit">Filter</button>
+            <button class="btn btn-outline-secondary" type="submit" >Filter</button>
         </div>
 
     </form>
