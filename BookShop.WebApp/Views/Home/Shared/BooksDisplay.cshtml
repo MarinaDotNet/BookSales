@@ -1,0 +1,36 @@
+﻿@using ApiUtilities.Models
+
+@model ViewModel
+
+<div class="row">
+    @if (Model.Product is not null && Model.Product.Books.Any())
+    {
+        @foreach (Book book in Model.Product.Books)
+        {
+            <div class="col-sm-4">
+                <div class="card text-white bg-secondary border-primary mb-3">
+                    <h3 class="card-header" title="Book Title" style="min-height: 7rem">@book.Title</h3>
+                    <img loading="lazy" class="card-img-top align-self-center" src="~/images/image2.webp" alt="Image of the book" />
+                    <div class="card-body">
+                        <h4 class="card-title" title="Book Authors">
+                            By @string.Join(", ", book.Authors)
+                        </h4>
+                        <div class="card-title card-price" title="Best Price">
+                            <h2>$@book.Price</h2>
+                        </div>
+                        <div class="card-buttons">
+                            <a class="btn btn-primary my-btn" title="Explore more about: &#10; `@book.Title`" href=@Url.ActionLink("Details", "Home", new {@book.Id})>Details</a>
+                            <a class="btn btn-primary my-btn" title="Add &#10; `@book.Title` into order" href=@Url.ActionLink("Add", "Home", new {@book.Id})>Add to Order</a>
+                        </div>
+                    </div>
+                    <div class="card-footer text-light" title="Book Genres" style="min-height: 7rem;">
+                        @foreach (string genre in book.Genres)
+                        {
+                            <a class="card-link text-light text-wrap" href="#">@genre</a>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    }
+</div>
