@@ -3,9 +3,11 @@ using ApiUtilities.Models;
 using BookShop.WebApp.Models;
 using BookShop.WebApp.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Json;
 
 namespace BookShop.WebApp.Controllers;
 
@@ -71,6 +73,58 @@ public class HomeController : Controller
     }
 
     /// <summary>
+    /// Sets up or updates the pagination for the <see cref="ViewModel"/> <paramref name="view"/> based on the provided parameters: 
+    /// <paramref name="itemsPerPage"/> and <paramref name="page"/>
+    /// </summary>
+    /// <param name="view">The view model <see cref="ViewModel"/> that contains pagination data.</param>
+    /// <param name="itemsPerPage">The number of items should be displayed per page. Defaults to 6 if null.</param>
+    /// <param name="page">Current page number. Defaults to 1 if null.</param>
+    private static void SetupPagination(ViewModel view, int? itemsPerPage, int? page)
+    {
+        if(view.Pagination is null || view.Pagination.ItemsPerPage != itemsPerPage)
+        {
+            view.Pagination = new PaginationModel(itemsPerPage ?? 6, page ?? 1);
+        }
+        else 
+        {
+            view.Pagination.SetCurrentPage(page ?? 1);
+        }
+    }
+
+    /// <summary>
+    /// Populates the <see cref="ViewModel"/> <paramref name="view"/> with genres, pagination data, and books collection based on the 
+    /// specified request endpoints <paramref name="booksEndpoint"/>
+    /// </summary>
+    /// <param name="view">The view model <see cref="ViewModel"/> to populate with data.</param>
+    /// <param name="booksEndpoint">The API endpoint to fetch books data from.</param>
+    /// <returns>A <see cref="Task"/> representing an asynchronous operation.</returns>
+    /// <exception cref="InvalidOperationException"> thrown when no books are available.</exception>
+    private async Task PopulateViewModelAsync(ViewModel view, string booksEndpoint)
+    {
+        if(view.Genres is null || view.Genres.Length == 0)
+        {
+            view.Genres = (await _httpClient.GetFromJsonAsync<IEnumerable<string>>(ApiEndpoints.Books.GetAllGenres))!.ToArray();
+        }
+
+        if(view.Pagination is not null)
+        {
+            var totalItems = await _httpClient.GetFromJsonAsync<int>(ApiEndpoints.Books.GetCountAll);
+            view.Pagination.CalculateTotalPages(totalItems);
+
+            var books = (await _httpClient.GetFromJsonAsync<IEnumerable<Book>>(booksEndpoint))!
+                .Skip(view.Pagination.ToSkipItems)
+                .Take(view.Pagination.ItemsPerPage);
+
+            if (books is null || !books.Any())
+            {
+                _logger.LogWarning("No books found for the current page.");
+                throw new InvalidOperationException("No books available.");
+            }
+
+            view.Product = new() { Books = books };
+        }
+    }
+    /// <summary>
     /// Displays the index page with a list of books.
     /// </summary>
     /// <returns>An <see cref="IActionResult"/> representing the result of the action.</returns>
@@ -88,7 +142,7 @@ public class HomeController : Controller
                 _logger.LogWarning("No books are found or data is null.");
                 return Error();
             }
-            
+
             ViewModel viewModel = new() { Product = new(){ Books = data } };
 
             return View(viewModel);
@@ -118,40 +172,23 @@ public class HomeController : Controller
     /// <param name="page">The number of the page requested, default sets to the first page.</param>
     /// <returns>An <see cref="IActionResult"/> representing the result of the action.</returns>
     [TokenAuthorizationAttribute("userToken")]
-    public async Task<IActionResult> ShopAsync(int itemsPerPage = 6, int page = 1)
+    public async Task<IActionResult> ShopAsync(int? itemsPerPage, int? page)
     {
         try
         {
-            //Creates and initializes the ViewModel for the page and sets the pagination for it.
-            ViewModel view = new() { Pagination = new(itemsPerPage, page) };
-            
-            //Gets the total quantity of the Books in the database  to count how many pages need to be displayed.
-            var quantity = await _httpClient.GetFromJsonAsync<int>(ApiEndpoints.Books.GetCountAll);
-
-            if (quantity < 1)
+            //Geting cached value
+            if(!_memoryCache.TryGetValue("view", out ViewModel? view))
             {
-                _logger.LogWarning("No books are found or data is null.");
-                return Error();
+                view = new ViewModel();
             }
 
-            //Calculating and setting the total amount of pages.
-            view.Pagination.CalculateTotalPages(quantity);
+            //Set pagination
+            SetupPagination(view!, itemsPerPage, page);
 
-            //Find out how many items to skip, to display appropriate items at the requested page.
-            int toSkip = view.Pagination.ToSkipItems;
+            //Fetch data and update the ViewModel
+            await PopulateViewModelAsync(view!, ApiEndpoints.Books.GetAll);
 
-            var data = (await _httpClient.GetFromJsonAsync<IEnumerable<Book>>(ApiEndpoints.Books.GetAll))!.Skip(toSkip).Take(view.Pagination.ItemsPerPage);
-
-            if (data is null || !data.Any())
-            {
-                _logger.LogWarning("No books are found or data is null.");
-                return Error();
-            }
-
-            view.Product = new() { Books = data };
-
-            //Gets and sets the list of genres for future filtering if needed.
-            view.Genres = (await _httpClient.GetFromJsonAsync<IEnumerable<string>>(ApiEndpoints.Books.GetAllGenres))!.ToArray();
+            _memoryCache.Set("view", view);
 
             return View(view);
         }
