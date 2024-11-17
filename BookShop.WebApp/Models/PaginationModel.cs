@@ -14,12 +14,18 @@ public class PaginationModel(int itemsPerPage, int currentPage)
     public int CurrentPage { get; private set; } = currentPage > 0 ? currentPage : 1;
 
     /// <summary>
+    /// Sets the current page.
+    /// </summary>
+    /// <param name="value">The value.</param>
+    public void SetCurrentPage(int value) => CurrentPage = value > 0 ? value : 1;
+
+    /// <summary>
     /// Gets the items per page.
     /// </summary>
     /// <value>
     /// The items per page.
     /// </value>
-    public int ItemsPerPage { get; } = itemsPerPage >= 5 ? itemsPerPage : 5;
+    public int ItemsPerPage { get; } = itemsPerPage >= 6 ? itemsPerPage : 6;
 
     /// <summary>
     /// Gets the total pages.
@@ -56,7 +62,7 @@ public class PaginationModel(int itemsPerPage, int currentPage)
     /// <summary>
     /// Calculates the skip items.
     /// </summary>
-    private void CalculateSkipItems()
+    public void CalculateSkipItems()
     {
         ToSkipItems = CurrentPage == 1 ?
             0 : (CurrentPage - 1) * ItemsPerPage;
