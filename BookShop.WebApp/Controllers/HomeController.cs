@@ -8,6 +8,7 @@ using Microsoft.Extensions.Caching.Memory;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http.Json;
+using static BookShop.WebApp.Services.ApiEndpoints;
 
 namespace BookShop.WebApp.Controllers;
 
@@ -79,14 +80,30 @@ public class HomeController : Controller
     /// <param name="view">The view model <see cref="ViewModel"/> that contains pagination data.</param>
     /// <param name="itemsPerPage">The number of items should be displayed per page. Defaults to 6 if null.</param>
     /// <param name="page">Current page number. Defaults to 1 if null.</param>
-    private static void SetupPagination(ViewModel view, int? itemsPerPage, int? page)
+    /// <remarks>
+    /// If the number of items per page changes of the <see cref="PaginationModel"/>, the cache with the key "dataToDisplay" is cleared.
+    /// This ensures that outdated data is not displayed. If only the page number changes, 
+    /// the existing pagination object is updated without recreating it.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">Throw when <paramref name="view"/> is null</exception>
+    private void SetupPagination(ViewModel view, int? itemsPerPage, int? page)
     {
+        ArgumentNullException.ThrowIfNull(view, "View model cannot be null.");
+
         if(view.Pagination is null || view.Pagination.ItemsPerPage != itemsPerPage)
         {
-            view.Pagination = new PaginationModel(itemsPerPage ?? 6, page ?? 1);
+            //Clear cache if itemsPerPage has changed to ensure data is updated on the user's request
+            if(view.Pagination!.ItemsPerPage != itemsPerPage)
+            {
+                _memoryCache.Remove("dataToDisplay");
+            }
+
+            //Initialize or reset the pagination with requested or with default values
+            view.Pagination = new(itemsPerPage ?? 6, page ?? 1);
         }
         else 
         {
+            //Only update the current page if the itemsPerPage was not requested for a change
             view.Pagination.SetCurrentPage(page ?? 1);
         }
     }
@@ -99,9 +116,16 @@ public class HomeController : Controller
     /// <param name="booksEndpoint">The API endpoint to fetch books data from.</param>
     /// <returns>A <see cref="Task"/> representing an asynchronous operation.</returns>
     /// <exception cref="InvalidOperationException"> thrown when no books are available.</exception>
+    /// <exception cref="ArgumentNullException"> throw when <paramref name="view"/> is null.</exception>
+    /// <exception cref="ArgumentException"> throw when <paramref name="booksEndpoint"/> is null, empty or consists of white space chars.</exception>
     private async Task PopulateViewModelAsync(ViewModel view, string booksEndpoint)
     {
-        if(view.Genres is null || view.Genres.Length == 0)
+        ArgumentNullException.ThrowIfNull(view, "View model cannot be null.");
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(booksEndpoint, "Books endpoint cannot be null or empty.");
+
+        //Fetch genres if not yet loaded
+        if (view.Genres is null || view.Genres.Length <= 1)
         {
             view.Genres = (await _httpClient.GetFromJsonAsync<IEnumerable<string>>(ApiEndpoints.Books.GetAllGenres))!.ToArray();
         }
@@ -109,21 +133,107 @@ public class HomeController : Controller
         if(view.Pagination is not null)
         {
             var totalItems = await _httpClient.GetFromJsonAsync<int>(ApiEndpoints.Books.GetCountAll);
+
             view.Pagination.CalculateTotalPages(totalItems);
+            
+            //Populate cache with relevant data for display
+            await ManageDataToDisplay(booksEndpoint, view.Pagination.TotalPages, view.Pagination.ItemsPerPage);
 
-            var books = (await _httpClient.GetFromJsonAsync<IEnumerable<Book>>(booksEndpoint))!
-                .Skip(view.Pagination.ToSkipItems)
-                .Take(view.Pagination.ItemsPerPage);
+            // Retrieve books from cache based on the current page.
+            var books = GetBooksFromCache(view.Pagination.CurrentPage);
 
-            if (books is null || !books.Any())
+            if (books is null || books.Count == 0)
             {
                 _logger.LogWarning("No books found for the current page.");
                 throw new InvalidOperationException("No books available.");
             }
 
+            // Populate the view model's product data.
             view.Product = new() { Books = books };
         }
     }
+
+    /// <summary>
+    /// Manages the retrieval and caching of paginated book data from the specified API endpoint.
+    /// </summary>
+    /// <param name="endpoint">The API endpoint to fetch the book data from.</param>
+    /// <param name="pages">The total number of pages for pagination.</param>
+    /// <param name="quantityPerPage">The number of books to display per page.</param>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <remarks>
+    /// This method checks the cache for existing paginated data. If the cache is expired or missing data, 
+    /// it fetches all books from the API, splits them into pages, and stores them in the cache.
+    /// </remarks>
+    /// <exception cref="InvalidOperationException">Thrown if no books are available from the API.</exception>
+    /// <exception cref="ArgumentNullException">Thrown if the <paramref name="endpoint"/> is null or empty.</exception>
+    private async Task ManageDataToDisplay(string endpoint, int pages, int quantityPerPage)
+    {
+        if(_memoryCache.TryGetValue("dataToDisplay", out (Dictionary<int, IEnumerable<Book>> dataAtPage, DateTime expiryTime) cache))
+        {
+            if(cache.expiryTime >= DateTime.Now && cache.dataAtPage.Count == pages)
+            {
+                //Cache is valid and do not need to be updated
+                return;
+            }
+
+            // Cache invalid, remove it.
+            _memoryCache.Remove("dataToDisplay"); 
+        }
+
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(endpoint, "The endpoint parameter cannot be null or empty.");
+
+        var books = await _httpClient.GetFromJsonAsync<IEnumerable<Book>>(endpoint);
+
+        if(books is null || !books.Any())
+        {
+            _logger.LogWarning("No books found in database.");
+            throw new InvalidOperationException("No books available.");
+        }
+
+        // Ensure at least one page.
+        pages = pages < 1 ? 1 : pages;
+        // Default to a minimum of 6 items per page.
+        quantityPerPage = quantityPerPage < 6 ? 6 : quantityPerPage;
+
+        Dictionary<int, IEnumerable<Book>> keyValuePairs = [];
+
+        for (int i = 1; i <= pages; i++)
+        {
+            int toSkip = (i - 1) * quantityPerPage;
+
+            keyValuePairs[i] = books.Skip(toSkip).Take(quantityPerPage);
+        }
+
+        _memoryCache.Set("dataToDisplay", (keyValuePairs, DateTime.Now.AddHours(2)));
+    }
+
+    /// <summary>
+    /// Retrieves the list of books for the specified page from the cache.
+    /// </summary>
+    /// <param name="page">The current page number to retrieve books for. Defaults to 1 if not specified.</param>
+    /// <returns>A list of <see cref="Book"/> objects for the specified page. Returns an empty list if no books are found.</returns>
+    /// <remarks>
+    /// This method attempts to retrieve cached paginated book data. If the cache is expired or invalid, 
+    /// it returns an empty list.
+    /// </remarks>
+    private List<Book> GetBooksFromCache(int page = 1)
+    {
+        // Ensure page number is at least 1.
+        page = page < 1 ? 1 : page;
+
+        if (_memoryCache.TryGetValue("dataToDisplay", out (Dictionary<int, IEnumerable<Book>> dataAtPage, DateTime expiryTime) cache))
+        {
+            if (cache.expiryTime >= DateTime.Now &&
+                cache.dataAtPage.TryGetValue(page, out IEnumerable<Book>? books))
+            {
+                return books!.ToList();
+            }
+        }
+
+        _logger.LogWarning($"No data found in cache for page {page}.");
+        return [];
+    }
+
     /// <summary>
     /// Displays the index page with a list of books.
     /// </summary>
