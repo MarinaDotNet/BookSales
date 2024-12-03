@@ -15,8 +15,8 @@
 <body id="shoppage">
     <form asp-controller="Home" asp-action="Filter" method="post">
         <div class="input-group mb-3">
-            <input type="text" class="form-control" id="expression" name="expression" placeholder="search" />
-            <button class="btn btn-outline-secondary" type="submit" asp-controller="Home" asp-action="Search">Search</button>
+            <input type="text" class="form-control" id="searchTerm" name="searchTerm" placeholder="search" required />
+            <button class="btn btn-outline-secondary" type="submit" asp-controller="Home" asp-action="SearchBooks">Search</button>
         </div>
 
         <div class="input-group mb-3">
