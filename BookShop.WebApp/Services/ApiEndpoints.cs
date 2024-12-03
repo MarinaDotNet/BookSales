@@ -41,6 +41,23 @@ public static class ApiEndpoints
         /// The get all genres.
         /// </value>
         public static string GetAllGenres => $"{BaseBookApiUrl}/all/genres";
+
+        /// <summary>
+        /// Searches the specified expression.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <param name="isAscending">if set to <c>true</c> [is ascending].</param>
+        /// <returns></returns>
+        public static string Search(string expression, bool isAscending) =>
+            $"{BaseBookApiUrl}/all/partialmatch/{Uri.EscapeDataString(expression)}?ascendingOrder={isAscending.ToString().ToLower()}";
+
+        /// <summary>
+        /// Gets the count for search.
+        /// </summary>
+        /// <param name="expression">The expression.</param>
+        /// <returns></returns>
+        public static string GetCountForSearch(string expression) =>
+            $"{BaseBookApiUrl}/books/count/partialmatch/{Uri.EscapeDataString(expression)}";
     }
 
     /// <summary>
