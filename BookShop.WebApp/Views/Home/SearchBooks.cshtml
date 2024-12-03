@@ -1,0 +1,106 @@
+﻿@using ApiUtilities.Models
+@using Microsoft.Extensions.Caching.Memory
+@{
+    ViewData["Title"] = "Search";
+
+    bool isUserAuthenticated = _memoryCache.TryGetValue("userToken", out (string token, string expiry, string userName, string email) userCache) &&
+                   !string.IsNullOrWhiteSpace(userCache.userName);
+
+    bool isWelcomeMessageVisible = DateTime.TryParse(userCache.expiry, out DateTime timeExpiry) && timeExpiry.AddMinutes(2) >= DateTime.Now.AddHours(3);
+}
+@inject IMemoryCache _memoryCache;
+
+@model ViewModel
+
+<body id="searchpage">
+    <form asp-controller="Home" asp-action="FilterBooksInSearch" method="post">
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" id="searchTerm" name="searchTerm" value="search for: '@Model.Filter.SearchTearm'" required />
+            <button class="btn btn-outline-secondary" type="submit" asp-controller="Home" asp-action="SearchBooks">Search</button>
+        </div>
+
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="genre">Genres</label>
+            <select id="genre" name="genre" class="form-select">
+                @if (Model.Filter.SelectedGenre.Equals("undefined"))
+                {
+                    <option value="undefined" selected>undefined</option>
+                }
+                else
+                {
+                    <option value="undefined">undefined</option>
+                }
+                @for (int i = 0; i < Model.Genres.Count(); i++)
+                {
+                    @if (Model.Filter.SelectedGenre.Equals(Model.Genres[i]))
+                    {
+                        <option value="@Model.Genres[i]" selected>@Model.Genres[i]</option>
+                    }
+                    else
+                    {
+                        <option value="@Model.Genres[i]">@Model.Genres[i]</option>
+                    }
+                }
+            </select>
+
+            <label class="input-group-text" for="isAscendingOrder">Price:</label>
+            <select id="isAscendingOrder" name="isAscendingOrder" class="form-select">
+                @if (Model.Filter.IsAscendingOrder)
+                {
+                    <option value="true" icon="&#8595;" selected> &#8595; lower to &#8593; higher</option>
+                    <option value="false" icon="&#8593;">&#8593; higher to lower &#8595;</option>
+                }
+                else
+                {
+                    <option value="true" icon="&#8595;">&#8595; lower to &#8593; higher</option>
+                    <option value="false" icon="&#8593;" selected>&#8593; higher to lower &#8595;</option>
+                }
+            </select>
+
+            <button class="btn btn-outline-secondary" type="submit">Filter</button>
+        </div>
+
+    </form>
+
+    <form>
+        <div class="text-center container-fluid">
+
+            @if (isUserAuthenticated && isWelcomeMessageVisible)
+            {
+                <h1 class="display-4">@userCache.userName, your are welcome to our Books Shelfs.</h1>
+            }
+        </div>
+
+        <partial name="Shared/BooksDisplay.cshtml" />
+
+    </form>
+
+    <form asp-controller="Home" asp-action="SearchBooks" method="post">
+        <div class="input-group mb-3">
+            <label class="input-group-text" for="itemsPerPage">Quantity per page:</label>
+            <select id="itemsPerPage" name="itemsPerPage" class="form-select">
+                @for (int i = 6; i < 25; i += 6)
+                {
+                    @if (Model.Pagination.ItemsPerPage == i)
+                    {
+                        <option value="@i" selected>@i</option>
+                    }
+                    else
+                    {
+                        <option value="@i">@i</option>
+                    }
+                }
+            </select>
+            <button class="btn btn-outline-secondary" type="submit">Apply</button>
+        </div>
+    </form>
+
+    <nav aria-label="Pagination">
+        <div>@Model.Pagination.CurrentPage of @Model.Pagination.TotalPages</div>
+        @for (int i = 1; i <= Model.Pagination.TotalPages; i++)
+        {
+            <a class='btn btn-primary my-btn @(i == Model.Pagination.CurrentPage ? "active" : string.Empty)'
+               href='@Url.ActionLink("SearchBooks", "Home", new {searchTerm=@Model.Filter.SearchTearm, isAscendingOrder=Model.Filter.IsAscendingOrder, itemsPerPage=Model.Pagination.ItemsPerPage, page = i})'>@i</a>
+        }
+    </nav>
+</body>
