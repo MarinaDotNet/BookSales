@@ -398,6 +398,52 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
             });
         }
     }
+
+    /// <summary>
+    /// Retrieves all books in genre asynchronous from the database, filtered by avilability if specified.
+    /// </summary>
+    /// <param name="genre">The genre of books.</param>
+    /// <param name="isAvailable">
+    /// An optional filter for availability; if <c>true</c>, only available books are returned; 
+    /// if <c>false</c>, only unavailable books are returned; if <c>null</c>, all books under specified <paramref name="genre"/> 
+    /// are returned.
+    /// </param>
+    /// <returns>A list of books under specified <paramref name="genre"/>; otherwise, a 404 response if no books are found, 
+    /// or a 500 response if an error occurs during processing.
+    /// </returns>
+    /// <response code="200">Books retrieved successfully.</response>
+    /// <response code="404">No books were found in the database.</response>
+    /// <response code="500">An error occurred while processing the request.</response>
+    [HttpGet("all/match/genre")]
+    public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksInGenreAsync(string genre, bool? isAvailable)
+    {
+        try
+        { 
+            var books = await _service.GetBooksByGenre(genre, isAvailable);
+
+            return books.Count > 0 ?
+                Ok(books) :
+                NotFound("No books found matching the given genre.");
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
+
+   
     #region Http Get Count Methods
 
     /// <summary>
@@ -568,6 +614,49 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
             var totalBooksCount = await _service.CountBooksByPartialMatchAsync(condition, isAvailable);
 
             return Ok(totalBooksCount);
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the total count of the books under specified <paramref name="genre"/> asynchronous from the database, 
+    /// filtered by avilability if specified.
+    /// </summary>
+    /// <param name="genre">The genre of books to be count.</param>
+    /// <param name="isAvailable">
+    /// An optional filter for availability; if <c>true</c>, only available books are counts; 
+    /// if <c>false</c>, only unavailable books are counts; if <c>null</c>, all books under specified <paramref name="genre"/> 
+    /// are counts.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the total count of books under the specified 
+    /// <paramref name="genre"/>.
+    /// </returns>
+    /// <response code="200">Returns the total count of books under specified condition.</response>
+    /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
+    [HttpGet("books/count/genre")]
+    public async Task<ActionResult<long>> CountBooksInGenreAsync(string genre, bool? isAvailable)
+    {
+        try
+        {
+            var count = await _service.CountBooksInGenre(genre, isAvailable);
+
+            return Ok(count);
         }
         catch (ApplicationException ex)
         {
@@ -1091,6 +1180,46 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
         }
     }
 
+    /// <summary>
+    /// Retrieves all books in genre asynchronous from the database, with default filter for availability status true 
+    /// <see cref="Book.IsAvailable"/>
+    /// </summary>
+    /// <param name="genre">The genre of books.</param>
+    /// <returns>A list of books under specified <paramref name="genre"/>; otherwise, a 404 response if no books are found, 
+    /// or a 500 response if an error occurs during processing.
+    /// </returns>
+    /// <response code="200">Books retrieved successfully.</response>
+    /// <response code="404">No books were found in the database.</response>
+    /// <response code="500">An error occurred while processing the request.</response>
+    [HttpGet("all/match/genre")]
+    public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksInGenreAsync(string genre)
+    {
+        try
+        {
+            var books = await _service.GetBooksByGenre(genre, true);
+
+            return books.Count > 0 ?
+                Ok(books) :
+                NotFound("No books found matching the given genre.");
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
+
     #region Http Get Count Methods
 
     /// <summary>
@@ -1205,6 +1334,44 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
             var totalBooksCount = await _service.CountBooksByPartialMatchAsync(condition, true);
 
             return Ok(totalBooksCount);
+        }
+        catch (ApplicationException ex)
+        {
+            _logger.LogError(ex, "An error occurred while processing the request.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = ex.Message
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An unexpected error occurred.");
+            return StatusCode(StatusCodes.Status500InternalServerError, new
+            {
+                message = "An unexpected error occurred. Please try again later."
+            });
+        }
+    }
+
+    /// <summary>
+    /// Retrieves the total count of the books under specified <paramref name="genre"/> asynchronous from the database, 
+    /// with default filter for availability status true <see cref="Book.IsAvailable"/>
+    /// </summary>
+    /// <param name="genre">The genre of books to be count.</param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the total count of books under the specified 
+    /// <paramref name="genre"/>.
+    /// </returns>
+    /// <response code="200">Returns the total count of books under specified condition.</response>
+    /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
+    [HttpGet("books/count/genre")]
+    public async Task<ActionResult<long>> CountBooksInGenreAsync(string genre)
+    {
+        try
+        {
+            var count = await _service.CountBooksInGenre(genre, true);
+
+            return Ok(count);
         }
         catch (ApplicationException ex)
         {
