@@ -414,7 +414,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     /// <response code="200">Books retrieved successfully.</response>
     /// <response code="404">No books were found in the database.</response>
     /// <response code="500">An error occurred while processing the request.</response>
-    [HttpGet("all/match/genre")]
+    [HttpGet("all/match/genre/{genre}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksInGenreAsync(string genre, bool? isAvailable)
     {
         try
@@ -649,7 +649,7 @@ public class StockV1Controller(MongoDBServices service, ILogger<StockV1Controlle
     /// </returns>
     /// <response code="200">Returns the total count of books under specified condition.</response>
     /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
-    [HttpGet("books/count/genre")]
+    [HttpGet("books/count/genre/{genre}")]
     public async Task<ActionResult<long>> CountBooksInGenreAsync(string genre, bool? isAvailable)
     {
         try
@@ -1191,7 +1191,7 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
     /// <response code="200">Books retrieved successfully.</response>
     /// <response code="404">No books were found in the database.</response>
     /// <response code="500">An error occurred while processing the request.</response>
-    [HttpGet("all/match/genre")]
+    [HttpGet("all/match/genre/{genre}")]
     public async Task<ActionResult<IEnumerable<Book>>> GetAllBooksInGenreAsync(string genre)
     {
         try
@@ -1364,7 +1364,7 @@ public class StockV2Controller(MongoDBServices service, ILogger<StockV2Controlle
     /// </returns>
     /// <response code="200">Returns the total count of books under specified condition.</response>
     /// <response code="500">Returns if an application or unexpected error occurs during the operation.</response>
-    [HttpGet("books/count/genre")]
+    [HttpGet("books/count/genre/{genre}")]
     public async Task<ActionResult<long>> CountBooksInGenreAsync(string genre)
     {
         try
