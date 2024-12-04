@@ -6,6 +6,7 @@ using Microsoft.VisualBasic.FileIO;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace BooksStock.API.Services;
@@ -496,6 +497,85 @@ public class MongoDBServices
         {
             _logger.LogError(ex, "An unexpected error occurred while sorting books by the property '{OrderParameter}' and in order '{isAscendingOrder}'.", orderParameter, isAscendingOrder);
             throw new ApplicationException("An unexpected error occured while sorting books. Please try again latter.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Retrieves all books by genre from the MongoDB collection, with an optional filter for availability status.
+    /// </summary>
+    /// <param name="genre">The genre of books.</param>
+    /// <param name="isAvailable">
+    /// An optional boolean value that filters books based on their availability status. If null, no availability filtering is applied.
+    /// </param>
+    /// <returns>A task representing the asynchronous operation. The task result contains a <see cref="List{Book}"/> 
+    /// representing the sorted list of books.</returns>
+    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs during the query or sorting process.</exception>
+    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the execution of the method.</exception>
+    public async Task<List<Book>> GetBooksByGenre(string genre, bool? isAvailable)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(genre, nameof(genre));
+
+            var trimedCondition = genre.Trim();
+
+            return await _collection.Find(book =>
+                isAvailable.HasValue ?
+                    book.Genres!.Any(genre => genre.Trim().Equals(trimedCondition, StringComparison.OrdinalIgnoreCase)) && 
+                    book.IsAvailable == isAvailable :
+                    book.Genres!.Any(genre => genre.Trim().Equals(trimedCondition, StringComparison.OrdinalIgnoreCase)))
+                .ToListAsync();
+
+        }
+        catch (MongoException ex)
+        {
+            _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
+            throw new MongoException("A Mongo Error occured while retreiving the data from database collection.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
+            throw new ApplicationException("An error occured while retreiving the data from database collection. Please try again latter.", ex);
+        }
+    }
+
+    /// <summary>
+    /// Retrives the total quantity of the books in specified genre and optionally filters by the availability status.
+    /// </summary>
+    /// <param name="genre">The genre of books to be count.</param>
+    /// <param name="isAvailable">
+    /// An optional boolean value that filters books based on their availability status. If null, no availability filtering is applied.
+    /// </param>
+    /// <returns>
+    /// A task representing the asynchronous operation. The task result contains the total number of books that contains the specified
+    /// genre  and, optionally, filters by the availability status.
+    /// </returns>
+    /// <exception cref="MongoException">Thrown when a MongoDB-related error occurs during the query or sorting process.</exception>
+    /// <exception cref="ApplicationException">Thrown when an unexpected error occurs during the execution of the method.</exception>
+    public async Task<long> CountBooksInGenre(string genre, bool? isAvailable)
+    {
+        try
+        {
+            ArgumentNullException.ThrowIfNullOrWhiteSpace(genre, nameof(genre));
+
+            var trimedCondition = genre.Trim();
+
+            return await _collection.Find(book =>
+                isAvailable.HasValue ?
+                    book.Genres!.Any(genre => genre.Trim().Equals(trimedCondition, StringComparison.OrdinalIgnoreCase)) &&
+                    book.IsAvailable == isAvailable :
+                    book.Genres!.Any(genre => genre.Trim().Equals(trimedCondition, StringComparison.OrdinalIgnoreCase)))
+                .CountDocumentsAsync();
+        }
+        catch (MongoException ex)
+        {
+            _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
+            throw new MongoException("A Mongo Error occured while retreiving the data from database collection.");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An error occured while retreiving the data from database collection.");
+            throw new ApplicationException("An error occured while retreiving the data from database collection. Please try again latter.", ex);
         }
     }
     #endregion Retrieving Data from MongoDB
